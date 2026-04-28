@@ -87,6 +87,7 @@ class _HomeState extends State<Home> {
   // ---------------------------------------------------------------------------
 
   Future<void> _adicionarGenero() async {
+    
     final nome = await mostrarDialogTexto(
       context,
       titulo: 'Adicionar gênero',

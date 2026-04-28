@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 /// Gerencia o estado e a lógica de negócio da biblioteca.
 ///
@@ -7,29 +9,17 @@ import 'package:flutter/material.dart';
 class BibliotecaController extends ChangeNotifier {
   String? generoSelecionado;
   String busca = '';
+  String apiUrl = 'https://library-api-service.vercel.app/';
 
-  final Map<String, List<String>> generos = {
-    'Ficção': [
-      '1984 - George Orwell',
-      'Admirável Mundo Novo - Aldous Huxley',
-      'Neuromancer - William Gibson',
-    ],
-    'Não Ficção': [
-      'Sapiens - Yuval Noah Harari',
-      'A Arte da Guerra - Sun Tzu',
-      'O Gene - Siddhartha Mukherjee',
-    ],
-    'Aventura': [
-      'Robinson Crusoé - Daniel Defoe',
-      'A Ilha do Tesouro - Robert Louis Stevenson',
-      'Viagem ao Centro da Terra - Júlio Verne',
-    ],
-    'Fantasia': [
-      'Senhor dos Anéis - J.R.R. Tolkien',
-      'Harry Potter - J.K. Rowling',
-      'As Crônicas do Gelo e Fogo - George R.R. Martin',
-    ],
-  };
+  Future<Map<String, List<String>>> _obterDados() async {
+    final response = await http.get(Uri.parse("$apiUrl/getall"));
+
+    final data = jsonDecode(response.body);
+
+    return data;
+  }
+
+  final Map<String, List<String>> generos = {};
 
   // ---------------------------------------------------------------------------
   // Derived state

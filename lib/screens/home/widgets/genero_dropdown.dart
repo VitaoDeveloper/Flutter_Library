@@ -23,7 +23,7 @@ class GeneroDropdown extends StatelessWidget {
           Text('Selecione um gênero'),
         ],
       ),
-      value: generoSelecionado,
+      initialValue: generoSelecionado,
       decoration: const InputDecoration(border: OutlineInputBorder()),
       icon: const Icon(Icons.arrow_drop_down),
       items: generos.keys.map((genero) {
