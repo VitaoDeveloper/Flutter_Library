@@ -1,10 +1,34 @@
+import 'package:biblioteca/models/genre.dart';
+import 'package:biblioteca/services/library_service.dart';
 import 'package:flutter/material.dart';
 
 /// Gerencia o estado e a lógica de negócio da biblioteca.
 ///
 /// Separa completamente as regras de manipulação de livros e gêneros
 /// da camada de apresentação (widgets).
-class BibliotecaController extends ChangeNotifier {
+class LibraryController extends ChangeNotifier {
+  final LibraryService _service;
+  LibraryController(this._service);
+
+  String? error;
+  bool loading = false;
+  List<Genre> genres = [];
+
+
+  Future<void> fetchLibrary() async {
+    loading = true;
+    notifyListeners();
+
+    try {
+      genres = await _service.fetchLibraryData();
+    } catch (e) {
+      error = e.toString();
+    }
+
+    loading = false;
+    notifyListeners();
+  }
+
   String? generoSelecionado;
   String busca = '';
 
@@ -121,8 +145,8 @@ class BibliotecaController extends ChangeNotifier {
   // Helpers privados
   // ---------------------------------------------------------------------------
 
-  bool _livroJaExiste(String nome) => livrosDoGeneroAtual
-      .any((l) => l.toLowerCase() == nome.toLowerCase());
+  bool _livroJaExiste(String nome) =>
+      livrosDoGeneroAtual.any((l) => l.toLowerCase() == nome.toLowerCase());
 
   String _capitalizar(String s) =>
       s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);

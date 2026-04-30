@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../controllers/biblioteca_controller.dart';
+import '../../controllers/library_controller.dart';
 import 'widgets/genero_dropdown.dart';
 import 'widgets/genero_acoes.dart';
 import 'widgets/livro_list_tile.dart';
@@ -13,7 +13,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final _controller = BibliotecaController();
+  final _controller = LibraryController();
   final _buscaController = TextEditingController();
 
   @override
