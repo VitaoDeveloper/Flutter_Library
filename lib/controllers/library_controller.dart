@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 /// Separa completamente as regras de manipulação de livros e gêneros
 /// da camada de apresentação (widgets).
 class LibraryController extends ChangeNotifier {
-  final LibraryService _service;
-  LibraryController(this._service);
+  
+  final LibraryService _service = LibraryService();
 
   String? error;
   bool loading = false;

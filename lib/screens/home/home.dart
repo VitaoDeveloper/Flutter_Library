@@ -1,8 +1,10 @@
+import 'package:biblioteca/utils/widgets/app_loadings.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/library_controller.dart';
 import 'widgets/genero_dropdown.dart';
 import 'widgets/genero_acoes.dart';
 import 'widgets/livro_list_tile.dart';
+import 'package:provider/provider.dart';
 import 'widgets/dialogs.dart';
 
 class Home extends StatefulWidget {
@@ -21,6 +23,20 @@ class _HomeState extends State<Home> {
     _buscaController.dispose();
     _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  Future<void> _init() async {
+    await Future.delayed(const Duration(seconds: 1));
+
+    if (!mounted) return;
+
+    context.read<LibraryController>().fetchLibrary();
   }
 
   // ---------------------------------------------------------------------------
@@ -157,12 +173,14 @@ class _HomeState extends State<Home> {
         tooltip: 'Adicionar Livro',
         child: const Icon(Icons.add),
       ),
-      body: Padding(
+      body: LibraryController().loading ? Center(
+        child: AppLoadingCenter(label: "Carregando")
+      ) : Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
           children: [
             GeneroDropdown(
-              generos: _controller.generos,
+              generos: _controller.genresMap,
               generoSelecionado: _controller.generoSelecionado,
               onChanged: (selecao) => setState(() {
                 _controller.selecionarGenero(selecao);
