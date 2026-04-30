@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 /// Gerencia o estado e a lógica de negócio da biblioteca.
 ///
@@ -9,15 +7,6 @@ import 'dart:convert';
 class BibliotecaController extends ChangeNotifier {
   String? generoSelecionado;
   String busca = '';
-  String apiUrl = 'https://library-api-service.vercel.app/';
-
-  Future<Map<String, List<String>>> _obterDados() async {
-    final response = await http.get(Uri.parse("$apiUrl/getall"));
-
-    final data = jsonDecode(response.body);
-
-    return data;
-  }
 
   final Map<String, List<String>> generos = {};
 
