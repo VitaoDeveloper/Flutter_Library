@@ -12,15 +12,24 @@ class LibraryController extends ChangeNotifier {
 
   String? error;
   bool loading = false;
-  List<Genre> genres = [];
 
+  List<Genre> genresList = [];
+  Map<String, List<String>> genresMap = {};
+
+  Map<String, List<String>> convertListToMap(List<Genre> genres) {
+    return {
+      for (var genre in genres)
+        genre.name: (genre.books).map((book) => book.name).toList()
+    };
+  }
 
   Future<void> fetchLibrary() async {
     loading = true;
     notifyListeners();
 
     try {
-      genres = await _service.fetchLibraryData();
+      genresList = await _service.fetchLibraryData();
+      genresMap = convertListToMap(genresList);
     } catch (e) {
       error = e.toString();
     }
@@ -32,14 +41,12 @@ class LibraryController extends ChangeNotifier {
   String? generoSelecionado;
   String busca = '';
 
-  final Map<String, List<String>> generos = {};
-
   // ---------------------------------------------------------------------------
   // Derived state
   // ---------------------------------------------------------------------------
 
   List<String> get livrosDoGeneroAtual =>
-      generos[generoSelecionado] ?? const [];
+      genresMap[generoSelecionado] ?? const [];
 
   List<String> get livrosFiltrados {
     if (busca.isEmpty) return livrosDoGeneroAtual;
@@ -74,7 +81,7 @@ class LibraryController extends ChangeNotifier {
     if (normalizado.isEmpty) return 'O nome não pode ser vazio.';
     if (_livroJaExiste(normalizado)) return 'Já existe um livro com esse nome.';
 
-    generos[generoSelecionado!]!.add(normalizado);
+    genresMap[generoSelecionado!]!.add(normalizado);
     notifyListeners();
     return null;
   }
@@ -110,33 +117,33 @@ class LibraryController extends ChangeNotifier {
   String? adicionarGenero(String nome) {
     final normalizado = _capitalizar(nome.trim());
     if (normalizado.isEmpty) return 'O nome não pode ser vazio.';
-    if (generos.containsKey(normalizado)) return 'Já existe esse gênero.';
+    if (genresMap.containsKey(normalizado)) return 'Já existe esse gênero.';
 
-    generos[normalizado] = [];
+    genresMap[normalizado] = [];
     generoSelecionado = normalizado;
     notifyListeners();
     return null;
   }
 
   String? editarGenero(String generoAtual, String novoNome) {
-    if (!generos.containsKey(generoAtual)) return 'Gênero não encontrado.';
+    if (!genresMap.containsKey(generoAtual)) return 'Gênero não encontrado.';
 
     final normalizado = _capitalizar(novoNome.trim());
     if (normalizado.isEmpty) return 'O nome não pode ser vazio.';
-    if (generos.containsKey(normalizado) &&
+    if (genresMap.containsKey(normalizado) &&
         normalizado.toLowerCase() != generoAtual.toLowerCase()) {
       return 'Já existe esse gênero.';
     }
 
-    final livros = generos.remove(generoAtual)!;
-    generos[normalizado] = livros;
+    final livros = genresMap.remove(generoAtual)!;
+    genresMap[normalizado] = livros;
     generoSelecionado = normalizado;
     notifyListeners();
     return null;
   }
 
   void excluirGenero(String genero) {
-    generos.remove(genero);
+    genresMap.remove(genero);
     generoSelecionado = null;
     notifyListeners();
   }
