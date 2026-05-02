@@ -1,9 +1,11 @@
 import '../utils/api/api_result.dart';
+import '../utils/api/api_errors.dart';
 import '../api/api_client.dart';
 import 'package:dio/dio.dart';
 
 class LibraryService {
   final api = ApiClient().client;
+  final apiErrors = ApiErrors();
 
   /// Returns raw map: { "Fiction": ["Book A", "Book B"], ... }
   Future<ApiResult<Map<String, List<String>>>> getAll() async {
@@ -20,7 +22,7 @@ class LibraryService {
 
       return ApiResult.success(result);
     } on DioException catch (e) {
-      return ApiResult.failure(_handleError(e));
+      return ApiResult.failure(apiErrors.handleError(e));
     } catch (e) {
       return ApiResult.failure('Unexpected error: $e');
     }
@@ -36,7 +38,7 @@ class LibraryService {
       final response = await api.post('/create/$table/$name', data: body);
       return ApiResult.success(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      return ApiResult.failure(_handleError(e));
+      return ApiResult.failure(apiErrors.handleError(e));
     } catch (e) {
       return ApiResult.failure('Unexpected error: $e');
     }
@@ -53,7 +55,7 @@ class LibraryService {
       final response = await api.patch('/edit/$table/$currentName', data: body);
       return ApiResult.success(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      return ApiResult.failure(_handleError(e));
+      return ApiResult.failure(apiErrors.handleError(e));
     } catch (e) {
       return ApiResult.failure('Unexpected error: $e');
     }
@@ -68,25 +70,11 @@ class LibraryService {
       final response = await api.delete('/delete/$table/$name');
       return ApiResult.success(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      return ApiResult.failure(_handleError(e));
+      return ApiResult.failure(apiErrors.handleError(e));
     } catch (e) {
       return ApiResult.failure('Unexpected error: $e');
     }
   }
 
-  String _handleError(DioException e) {
-    switch (e.type) {
-      case DioExceptionType.connectionTimeout:
-      case DioExceptionType.receiveTimeout:
-        return 'Connection timed out. Check your internet connection.';
-      case DioExceptionType.badResponse:
-        final status = e.response?.statusCode;
-        final message = e.response?.data?['message'] ?? 'Unknown error';
-        return 'Error $status: $message';
-      case DioExceptionType.connectionError:
-        return 'Unable to reach the server.';
-      default:
-        return 'Network error: ${e.message}';
-    }
-  }
+  
 }
