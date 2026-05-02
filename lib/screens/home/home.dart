@@ -217,6 +217,13 @@ class _HomeState extends State<Home> {
           ),
         ),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Reload',
+            onPressed: _controller.initialize,
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _controller.selectedGenre == null

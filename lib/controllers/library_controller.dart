@@ -92,7 +92,7 @@ class LibraryController extends ChangeNotifier {
     final result = await _service.create(
       table: 'books',
       name: normalized,
-      body: {'name': normalized, 'gender': selectedGenre},
+      body: {'name': normalized, 'genre': selectedGenre},
     );
 
     if (!result.isSuccess) return result.error;
@@ -119,7 +119,7 @@ class LibraryController extends ChangeNotifier {
     final result = await _service.edit(
       table: 'books',
       currentName: currentName,
-      body: {'name': normalized, 'gender': selectedGenre},
+      body: {'name': normalized, 'genre': selectedGenre},
     );
 
     if (!result.isSuccess) return result.error;
