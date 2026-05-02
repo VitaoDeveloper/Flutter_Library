@@ -23,7 +23,7 @@ class GenreDropdown extends StatelessWidget {
           Text('Select a genre'),
         ],
       ),
-      value: selectedGenre,
+      initialValue: selectedGenre,
       decoration: const InputDecoration(border: OutlineInputBorder()),
       icon: const Icon(Icons.arrow_drop_down),
       items: genres.keys.map((genre) {

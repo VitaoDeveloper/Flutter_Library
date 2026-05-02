@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 
-/// Coleta um texto do usuário via [AlertDialog].
+/// Prompts the user for a text input via [AlertDialog].
 ///
-/// Retorna o texto digitado ou [null] se cancelado.
-Future<String?> mostrarDialogTexto(
+/// Returns the typed text or [null] if cancelled.
+Future<String?> showTextDialog(
   BuildContext context, {
-  required String titulo,
-  required String labelCampo,
-  required String textoBotaoConfirmar,
-  String textoInicial = '',
+  required String title,
+  required String fieldLabel,
+  required String confirmButtonText,
+  String initialText = '',
 }) async {
-  final controller = TextEditingController(text: textoInicial);
+  final controller = TextEditingController(text: initialText);
 
   return showDialog<String?>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: Text(titulo),
+      title: Text(title),
       content: TextField(
         controller: controller,
         autofocus: true,
         decoration: InputDecoration(
-          labelText: labelCampo,
+          labelText: fieldLabel,
           border: const OutlineInputBorder(),
         ),
         textInputAction: TextInputAction.done,
@@ -29,42 +29,42 @@ Future<String?> mostrarDialogTexto(
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(null),
-          child: const Text('Cancelar'),
+          child: const Text('Cancel'),
         ),
         FilledButton(
           onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
-          child: Text(textoBotaoConfirmar),
+          child: Text(confirmButtonText),
         ),
       ],
     ),
   );
 }
 
-/// Pede confirmação do usuário antes de uma ação destrutiva.
+/// Asks for user confirmation before a destructive action.
 ///
-/// Retorna [true] se o usuário confirmou, [false] caso contrário.
-Future<bool> mostrarDialogConfirmacao(
+/// Returns [true] if confirmed, [false] otherwise.
+Future<bool> showConfirmationDialog(
   BuildContext context, {
-  required String titulo,
-  required String mensagem,
-  String textoBotaoConfirmar = 'Confirmar',
+  required String title,
+  required String message,
+  String confirmButtonText = 'Confirm',
 }) async {
-  final resultado = await showDialog<bool>(
+  final result = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: Text(titulo),
-      content: Text(mensagem),
+      title: Text(title),
+      content: Text(message),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(false),
-          child: const Text('Cancelar'),
+          child: const Text('Cancel'),
         ),
         FilledButton(
           onPressed: () => Navigator.of(ctx).pop(true),
-          child: Text(textoBotaoConfirmar),
+          child: Text(confirmButtonText),
         ),
       ],
     ),
   );
-  return resultado ?? false;
+  return result ?? false;
 }

@@ -1,160 +1,228 @@
-import 'package:biblioteca/models/genre.dart';
-import 'package:biblioteca/services/library_service.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import '../services/library_service.dart';
 
-/// Gerencia o estado e a lógica de negócio da biblioteca.
+enum LibraryStatus { idle, loading, success, error }
+
+/// Manages state and business logic for the library app.
 ///
-/// Separa completamente as regras de manipulação de livros e gêneros
-/// da camada de apresentação (widgets).
+/// On [initialize], fetches all genres and books from the API.
+/// Every CRUD operation calls the API and updates local state on success.
 class LibraryController extends ChangeNotifier {
-  
-  final LibraryService _service = LibraryService();
+  final LibraryService _service;
 
-  String? error;
-  bool loading = false;
+  LibraryController({LibraryService? service})
+      : _service = service ?? LibraryService();
 
-  List<Genre> genresList = [];
-  Map<String, List<String>> genresMap = {};
+  // ---------------------------------------------------------------------------
+  // State
+  // ---------------------------------------------------------------------------
 
-  Map<String, List<String>> convertListToMap(List<Genre> genres) {
-    return {
-      for (var genre in genres)
-        genre.name: (genre.books).map((book) => book.name).toList()
-    };
-  }
+  LibraryStatus _status = LibraryStatus.idle;
+  String? _errorMessage;
+  String? selectedGenre;
+  String searchQuery = '';
 
-  Future<void> fetchLibrary() async {
-    loading = true;
-    notifyListeners();
+  /// Source of truth: { genreName: [bookName, ...] }
+  final Map<String, List<String>> genres = {};
 
-    try {
-      genresList = await _service.fetchLibraryData();
-      genresMap = convertListToMap(genresList);
-    } catch (e) {
-      error = e.toString();
-    }
-
-    loading = false;
-    notifyListeners();
-  }
-
-  String? generoSelecionado;
-  String busca = '';
+  LibraryStatus get status => _status;
+  String? get errorMessage => _errorMessage;
+  bool get isLoading => _status == LibraryStatus.loading;
 
   // ---------------------------------------------------------------------------
   // Derived state
   // ---------------------------------------------------------------------------
 
-  List<String> get livrosDoGeneroAtual =>
-      genresMap[generoSelecionado] ?? const [];
+  List<String> get booksInSelectedGenre => genres[selectedGenre] ?? const [];
 
-  List<String> get livrosFiltrados {
-    if (busca.isEmpty) return livrosDoGeneroAtual;
-    return livrosDoGeneroAtual
-        .where((l) => l.toLowerCase().contains(busca.toLowerCase()))
+  List<String> get filteredBooks {
+    if (searchQuery.isEmpty) return booksInSelectedGenre;
+    return booksInSelectedGenre
+        .where((b) => b.toLowerCase().contains(searchQuery.toLowerCase()))
         .toList();
   }
 
   // ---------------------------------------------------------------------------
-  // Seleção / busca
+  // Initialization
   // ---------------------------------------------------------------------------
 
-  void selecionarGenero(String? genero) {
-    generoSelecionado = genero;
-    busca = '';
+  /// Call this in [initState] of the home screen.
+  /// Fetches all genres and books from the API.
+  Future<void> initialize() async {
+    _setLoading();
+
+    final result = await _service.getAll();
+
+    if (result.isSuccess) {
+      genres
+        ..clear()
+        ..addAll(result.data!);
+      _setSuccess();
+    } else {
+      _setError(result.error!);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Selection / search
+  // ---------------------------------------------------------------------------
+
+  void selectGenre(String? genre) {
+    selectedGenre = genre;
+    searchQuery = '';
     notifyListeners();
   }
 
-  void atualizarBusca(String texto) {
-    busca = texto;
+  void updateSearch(String query) {
+    searchQuery = query;
     notifyListeners();
   }
 
   // ---------------------------------------------------------------------------
-  // Livros
+  // Books
   // ---------------------------------------------------------------------------
 
-  /// Retorna [null] em caso de sucesso ou uma mensagem de erro.
-  String? adicionarLivro(String nome) {
-    if (generoSelecionado == null) return 'Selecione um gênero primeiro.';
-    final normalizado = _capitalizar(nome.trim());
-    if (normalizado.isEmpty) return 'O nome não pode ser vazio.';
-    if (_livroJaExiste(normalizado)) return 'Já existe um livro com esse nome.';
+  /// Returns [null] on success or an error message.
+  Future<String?> addBook(String name) async {
+    if (selectedGenre == null) return 'Select a genre first.';
+    final normalized = _capitalize(name.trim());
+    if (normalized.isEmpty) return 'Name cannot be empty.';
+    if (_bookExists(normalized)) return 'A book with that name already exists.';
 
-    genresMap[generoSelecionado!]!.add(normalizado);
+    final result = await _service.create(
+      table: 'books',
+      name: normalized,
+      body: {'name': normalized, 'gender': selectedGenre},
+    );
+
+    if (!result.isSuccess) return result.error;
+
+    genres[selectedGenre!]!.add(normalized);
     notifyListeners();
     return null;
   }
 
-  /// Retorna [null] em caso de sucesso ou uma mensagem de erro.
-  String? editarLivro(int indexReal, String novoNome) {
-    final livros = livrosDoGeneroAtual;
-    if (indexReal < 0 || indexReal >= livros.length) return 'Índice inválido.';
+  /// Returns [null] on success or an error message.
+  Future<String?> editBook(int index, String newName) async {
+    final books = booksInSelectedGenre;
+    if (index < 0 || index >= books.length) return 'Invalid index.';
 
-    final normalizado = _capitalizar(novoNome.trim());
-    if (normalizado.isEmpty) return 'O nome não pode ser vazio.';
+    final normalized = _capitalize(newName.trim());
+    if (normalized.isEmpty) return 'Name cannot be empty.';
 
-    final livroAtual = livros[indexReal];
-    if (_livroJaExiste(normalizado) &&
-        normalizado.toLowerCase() != livroAtual.toLowerCase()) {
-      return 'Já existe um livro com esse nome.';
+    final currentName = books[index];
+    if (_bookExists(normalized) &&
+        normalized.toLowerCase() != currentName.toLowerCase()) {
+      return 'A book with that name already exists.';
     }
 
-    livros[indexReal] = normalizado;
+    final result = await _service.edit(
+      table: 'books',
+      currentName: currentName,
+      body: {'name': normalized, 'gender': selectedGenre},
+    );
+
+    if (!result.isSuccess) return result.error;
+
+    books[index] = normalized;
     notifyListeners();
     return null;
   }
 
-  void excluirLivro(int indexReal) {
-    livrosDoGeneroAtual.removeAt(indexReal);
-    notifyListeners();
-  }
+  Future<String?> deleteBook(int index) async {
+    final books = booksInSelectedGenre;
+    final name = books[index];
 
-  // ---------------------------------------------------------------------------
-  // Gêneros
-  // ---------------------------------------------------------------------------
+    final result = await _service.delete(table: 'books', name: name);
+    if (!result.isSuccess) return result.error;
 
-  String? adicionarGenero(String nome) {
-    final normalizado = _capitalizar(nome.trim());
-    if (normalizado.isEmpty) return 'O nome não pode ser vazio.';
-    if (genresMap.containsKey(normalizado)) return 'Já existe esse gênero.';
-
-    genresMap[normalizado] = [];
-    generoSelecionado = normalizado;
+    books.removeAt(index);
     notifyListeners();
     return null;
   }
 
-  String? editarGenero(String generoAtual, String novoNome) {
-    if (!genresMap.containsKey(generoAtual)) return 'Gênero não encontrado.';
+  // ---------------------------------------------------------------------------
+  // Genres
+  // ---------------------------------------------------------------------------
 
-    final normalizado = _capitalizar(novoNome.trim());
-    if (normalizado.isEmpty) return 'O nome não pode ser vazio.';
-    if (genresMap.containsKey(normalizado) &&
-        normalizado.toLowerCase() != generoAtual.toLowerCase()) {
-      return 'Já existe esse gênero.';
+  Future<String?> addGenre(String name) async {
+    final normalized = _capitalize(name.trim());
+    if (normalized.isEmpty) return 'Name cannot be empty.';
+    if (genres.containsKey(normalized)) return 'This genre already exists.';
+
+    final result = await _service.create(
+      table: 'genres',
+      name: normalized,
+      body: {'name': normalized},
+    );
+
+    if (!result.isSuccess) return result.error;
+
+    genres[normalized] = [];
+    selectedGenre = normalized;
+    notifyListeners();
+    return null;
+  }
+
+  Future<String?> editGenre(String currentName, String newName) async {
+    if (!genres.containsKey(currentName)) return 'Genre not found.';
+
+    final normalized = _capitalize(newName.trim());
+    if (normalized.isEmpty) return 'Name cannot be empty.';
+    if (genres.containsKey(normalized) &&
+        normalized.toLowerCase() != currentName.toLowerCase()) {
+      return 'This genre already exists.';
     }
 
-    final livros = genresMap.remove(generoAtual)!;
-    genresMap[normalizado] = livros;
-    generoSelecionado = normalizado;
+    final result = await _service.edit(
+      table: 'genres',
+      currentName: currentName,
+      body: {'name': normalized},
+    );
+
+    if (!result.isSuccess) return result.error;
+
+    final books = genres.remove(currentName)!;
+    genres[normalized] = books;
+    selectedGenre = normalized;
     notifyListeners();
     return null;
   }
 
-  void excluirGenero(String genero) {
-    genresMap.remove(genero);
-    generoSelecionado = null;
+  Future<String?> deleteGenre(String name) async {
+    final result = await _service.delete(table: 'genres', name: name);
+    if (!result.isSuccess) return result.error;
+
+    genres.remove(name);
+    selectedGenre = null;
     notifyListeners();
+    return null;
   }
 
   // ---------------------------------------------------------------------------
-  // Helpers privados
+  // Private helpers
   // ---------------------------------------------------------------------------
 
-  bool _livroJaExiste(String nome) =>
-      livrosDoGeneroAtual.any((l) => l.toLowerCase() == nome.toLowerCase());
+  bool _bookExists(String name) => booksInSelectedGenre
+      .any((b) => b.toLowerCase() == name.toLowerCase());
 
-  String _capitalizar(String s) =>
+  String _capitalize(String s) =>
       s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+
+  void _setLoading() {
+    _status = LibraryStatus.loading;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  void _setSuccess() {
+    _status = LibraryStatus.success;
+    notifyListeners();
+  }
+
+  void _setError(String message) {
+    _status = LibraryStatus.error;
+    _errorMessage = message;
+    notifyListeners();
+  }
 }

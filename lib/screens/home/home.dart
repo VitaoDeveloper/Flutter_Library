@@ -1,10 +1,9 @@
-import 'package:biblioteca/utils/widgets/app_loadings.dart';
 import 'package:flutter/material.dart';
+import '../../utils/widgets/app_loading.dart';
 import '../../controllers/library_controller.dart';
-import 'widgets/genero_dropdown.dart';
-import 'widgets/genero_acoes.dart';
-import 'widgets/livro_list_tile.dart';
-import 'package:provider/provider.dart';
+import 'widgets/genre_dropdown.dart';
+import 'widgets/genre_actions.dart';
+import 'widgets/book_list_tile.dart';
 import 'widgets/dialogs.dart';
 
 class Home extends StatefulWidget {
@@ -16,136 +15,136 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final _controller = LibraryController();
-  final _buscaController = TextEditingController();
-
-  @override
-  void dispose() {
-    _buscaController.dispose();
-    _controller.dispose();
-    super.dispose();
-  }
+  final _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _init();
+    // Fetch all genres and books from the API on startup
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _controller.initialize().then((_) => setState(() {}));
+    });
   }
 
-  Future<void> _init() async {
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (!mounted) return;
-
-    context.read<LibraryController>().fetchLibrary();
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _controller.dispose();
+    super.dispose();
   }
 
   // ---------------------------------------------------------------------------
-  // Mensagem
+  // Snackbar
   // ---------------------------------------------------------------------------
 
-  void _mostrarSnackBar(String msg) {
+  void _showSnackBar(String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(msg)));
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   // ---------------------------------------------------------------------------
-  // Ações de livro
+  // Book actions
   // ---------------------------------------------------------------------------
 
-  Future<void> _adicionarLivro() async {
-    final nome = await mostrarDialogTexto(
+  Future<void> _addBook() async {
+    final name = await showTextDialog(
       context,
-      titulo: 'Adicionar livro',
-      labelCampo: 'Nome do livro',
-      textoBotaoConfirmar: 'Adicionar',
+      title: 'Add Book',
+      fieldLabel: 'Book name',
+      confirmButtonText: 'Add',
     );
-    if (nome == null) return;
+    if (name == null) return;
 
-    final erro = _controller.adicionarLivro(nome);
-    _mostrarSnackBar(erro ?? 'Livro adicionado.');
-    if (erro == null) setState(() {});
+    _showSnackBar('Saving...');
+    final error = await _controller.addBook(name);
+    _showSnackBar(error ?? 'Book added.');
+    if (error == null) setState(() {});
   }
 
-  Future<void> _editarLivro(int indexReal) async {
-    final livroAtual = _controller.livrosDoGeneroAtual[indexReal];
-    final novoNome = await mostrarDialogTexto(
+  Future<void> _editBook(int index) async {
+    final currentName = _controller.booksInSelectedGenre[index];
+    final newName = await showTextDialog(
       context,
-      titulo: 'Editar livro',
-      labelCampo: 'Nome do livro',
-      textoBotaoConfirmar: 'Salvar',
-      textoInicial: livroAtual,
+      title: 'Edit Book',
+      fieldLabel: 'Book name',
+      confirmButtonText: 'Save',
+      initialText: currentName,
     );
-    if (novoNome == null) return;
+    if (newName == null) return;
 
-    final erro = _controller.editarLivro(indexReal, novoNome);
-    _mostrarSnackBar(erro ?? 'Livro atualizado.');
-    if (erro == null) setState(() {});
+    _showSnackBar('Saving...');
+    final error = await _controller.editBook(index, newName);
+    _showSnackBar(error ?? 'Book updated.');
+    if (error == null) setState(() {});
   }
 
-  Future<void> _excluirLivro(int indexReal) async {
-    final livro = _controller.livrosDoGeneroAtual[indexReal];
-    final confirmado = await mostrarDialogConfirmacao(
+  Future<void> _deleteBook(int index) async {
+    final name = _controller.booksInSelectedGenre[index];
+    final confirmed = await showConfirmationDialog(
       context,
-      titulo: 'Excluir livro',
-      mensagem: 'Tem certeza que deseja excluir "$livro"?',
-      textoBotaoConfirmar: 'Excluir',
+      title: 'Delete Book',
+      message: 'Are you sure you want to delete "$name"?',
+      confirmButtonText: 'Delete',
     );
-    if (!confirmado) return;
+    if (!confirmed) return;
 
-    _controller.excluirLivro(indexReal);
-    setState(() {});
-    _mostrarSnackBar('Livro "$livro" excluído.');
+    _showSnackBar('Deleting...');
+    final error = await _controller.deleteBook(index);
+    _showSnackBar(error ?? 'Book "$name" deleted.');
+    if (error == null) setState(() {});
   }
 
   // ---------------------------------------------------------------------------
-  // Ações de gênero
+  // Genre actions
   // ---------------------------------------------------------------------------
 
-  Future<void> _adicionarGenero() async {
-    
-    final nome = await mostrarDialogTexto(
+  Future<void> _addGenre() async {
+    final name = await showTextDialog(
       context,
-      titulo: 'Adicionar gênero',
-      labelCampo: 'Nome do gênero',
-      textoBotaoConfirmar: 'Adicionar',
+      title: 'Add Genre',
+      fieldLabel: 'Genre name',
+      confirmButtonText: 'Add',
     );
-    if (nome == null) return;
+    if (name == null) return;
 
-    final erro = _controller.adicionarGenero(nome);
-    _mostrarSnackBar(erro ?? 'Gênero adicionado.');
-    if (erro == null) setState(() {});
+    _showSnackBar('Saving...');
+    final error = await _controller.addGenre(name);
+    _showSnackBar(error ?? 'Genre added.');
+    if (error == null) setState(() {});
   }
 
-  Future<void> _editarGenero() async {
-    final generoAtual = _controller.generoSelecionado!;
-    final novoNome = await mostrarDialogTexto(
+  Future<void> _editGenre() async {
+    final currentName = _controller.selectedGenre!;
+    final newName = await showTextDialog(
       context,
-      titulo: 'Editar Gênero',
-      labelCampo: 'Nome do Gênero',
-      textoBotaoConfirmar: 'Salvar',
-      textoInicial: generoAtual,
+      title: 'Edit Genre',
+      fieldLabel: 'Genre name',
+      confirmButtonText: 'Save',
+      initialText: currentName,
     );
-    if (novoNome == null) return;
+    if (newName == null) return;
 
-    final erro = _controller.editarGenero(generoAtual, novoNome);
-    _mostrarSnackBar(erro ?? 'Gênero atualizado.');
-    if (erro == null) setState(() {});
+    _showSnackBar('Saving...');
+    final error = await _controller.editGenre(currentName, newName);
+    _showSnackBar(error ?? 'Genre updated.');
+    if (error == null) setState(() {});
   }
 
-  Future<void> _excluirGenero() async {
-    final genero = _controller.generoSelecionado!;
-    final confirmado = await mostrarDialogConfirmacao(
+  Future<void> _deleteGenre() async {
+    final name = _controller.selectedGenre!;
+    final confirmed = await showConfirmationDialog(
       context,
-      titulo: 'Excluir gênero',
-      mensagem: 'Tem certeza que deseja excluir "$genero"?',
-      textoBotaoConfirmar: 'Excluir',
+      title: 'Delete Genre',
+      message: 'Are you sure you want to delete "$name"?',
+      confirmButtonText: 'Delete',
     );
-    if (!confirmado) return;
+    if (!confirmed) return;
 
-    _controller.excluirGenero(genero);
-    setState(() {});
-    _mostrarSnackBar('Gênero "$genero" excluído.');
+    _showSnackBar('Deleting...');
+    final error = await _controller.deleteGenre(name);
+    _showSnackBar(error ?? 'Genre "$name" deleted.');
+    if (error == null) setState(() {});
   }
 
   // ---------------------------------------------------------------------------
@@ -154,12 +153,65 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    final livros = _controller.livrosFiltrados;
+    // Loading state — shown only on first fetch
+    if (_controller.isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'Library',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            ),
+          ),
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        ),
+        body: AppLoading(label: "Loading")
+      );
+    }
+
+    // Error state
+    if (_controller.status == LibraryStatus.error) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'Library',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            ),
+          ),
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.wifi_off, size: 48, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(
+                _controller.errorMessage ?? 'Unknown error.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () => _controller
+                    .initialize()
+                    .then((_) => setState(() {})),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Try again'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Success state
+    final books = _controller.filteredBooks;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Biblioteca Flutter',
+          'Library',
           style: TextStyle(
             color: Theme.of(context).colorScheme.onPrimaryContainer,
           ),
@@ -167,64 +219,62 @@ class _HomeState extends State<Home> {
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _controller.generoSelecionado == null
-            ? () => _mostrarSnackBar('Selecione um gênero antes de adicionar.')
-            : _adicionarLivro,
-        tooltip: 'Adicionar Livro',
+        onPressed: _controller.selectedGenre == null
+            ? () => _showSnackBar('Select a genre before adding a book.')
+            : _addBook,
+        tooltip: 'Add Book',
         child: const Icon(Icons.add),
       ),
-      body: LibraryController().loading ? Center(
-        child: AppLoadingCenter(label: "Carregando")
-      ) : Padding(
+      body: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
           children: [
-            GeneroDropdown(
-              generos: _controller.genresMap,
-              generoSelecionado: _controller.generoSelecionado,
-              onChanged: (selecao) => setState(() {
-                _controller.selecionarGenero(selecao);
-                _buscaController.clear();
+            GenreDropdown(
+              genres: _controller.genres,
+              selectedGenre: _controller.selectedGenre,
+              onChanged: (selection) => setState(() {
+                _controller.selectGenre(selection);
+                _searchController.clear();
               }),
             ),
             const SizedBox(height: 12),
             TextField(
-              controller: _buscaController,
-              enabled: _controller.generoSelecionado != null,
+              controller: _searchController,
+              enabled: _controller.selectedGenre != null,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.search),
-                hintText: 'Buscar livro',
+                hintText: 'Search book',
               ),
-              onChanged: (txt) => setState(() => _controller.atualizarBusca(txt)),
+              onChanged: (text) =>
+                  setState(() => _controller.updateSearch(text)),
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: livros.isEmpty
-                  ? const Center(child: Text('Nenhum resultado.'))
+              child: books.isEmpty
+                  ? const Center(child: Text('No results.'))
                   : ListView.separated(
-                      itemCount: livros.length,
+                      itemCount: books.length,
                       separatorBuilder: (_, __) => const Divider(height: 1),
-                      itemBuilder: (context, indexFiltrado) {
-                        final livro = livros[indexFiltrado];
-                        final indexReal =
-                            _controller.livrosDoGeneroAtual.indexOf(livro);
-                        return LivroListTile(
-                          livro: livro,
-                          onTap: () =>
-                              _mostrarSnackBar('Você selecionou: $livro'),
-                          onEditar: () => _editarLivro(indexReal),
-                          onExcluir: () => _excluirLivro(indexReal),
+                      itemBuilder: (context, filteredIndex) {
+                        final book = books[filteredIndex];
+                        final realIndex =
+                            _controller.booksInSelectedGenre.indexOf(book);
+                        return BookListTile(
+                          book: book,
+                          onTap: () => _showSnackBar('Selected: $book'),
+                          onEdit: () => _editBook(realIndex),
+                          onDelete: () => _deleteBook(realIndex),
                         );
                       },
                     ),
             ),
             const SizedBox(height: 12),
-            GeneroAcoes(
-              generoSelecionado: _controller.generoSelecionado,
-              onAdicionar: _adicionarGenero,
-              onEditar: _editarGenero,
-              onExcluir: _excluirGenero,
+            GenreActions(
+              selectedGenre: _controller.selectedGenre,
+              onAdd: _addGenre,
+              onEdit: _editGenre,
+              onDelete: _deleteGenre,
             ),
           ],
         ),
