@@ -91,7 +91,6 @@ class LibraryController extends ChangeNotifier {
 
     final result = await _service.create(
       table: 'books',
-      name: normalized,
       body: {'name': normalized, 'genre': selectedGenre},
     );
 
@@ -152,7 +151,6 @@ class LibraryController extends ChangeNotifier {
 
     final result = await _service.create(
       table: 'genres',
-      name: normalized,
       body: {'name': normalized},
     );
 
