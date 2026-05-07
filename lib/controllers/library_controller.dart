@@ -118,7 +118,7 @@ class LibraryController extends ChangeNotifier {
     final result = await _service.edit(
       table: 'books',
       currentName: currentName,
-      body: {'name': normalized, 'genre': selectedGenre},
+      body: {'update': normalized},
     );
 
     if (!result.isSuccess) return result.error;
@@ -175,7 +175,7 @@ class LibraryController extends ChangeNotifier {
     final result = await _service.edit(
       table: 'genres',
       currentName: currentName,
-      body: {'name': normalized},
+      body: {'update': normalized},
     );
 
     if (!result.isSuccess) return result.error;
