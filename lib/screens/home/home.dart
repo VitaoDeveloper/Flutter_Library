@@ -20,10 +20,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    // Fetch all genres and books from the API on startup
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _controller.initialize().then((_) => setState(() {}));
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _reloadData());
   }
 
   @override
@@ -221,13 +218,6 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
       appBar: _buildAppBar(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _controller.selectedGenre == null
-            ? () => _showSnackBar('Selecione um gênero antes de adicionar um livro.')
-            : _addBook,
-        tooltip: 'Adicionar livro',
-        child: const Icon(Icons.add),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -235,13 +225,32 @@ class _HomeState extends State<Home> {
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(12),
-                child: GenreDropdown(
-                  genres: _controller.genres,
-                  selectedGenre: _controller.selectedGenre,
-                  onChanged: (selection) => setState(() {
-                    _controller.selectGenre(selection);
-                    _searchController.clear();
-                  }),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GenreDropdown(
+                        genres: _controller.genres,
+                        selectedGenre: _controller.selectedGenre,
+                        onChanged: (selection) => setState(() {
+                          _controller.selectGenre(selection);
+                          _searchController.clear();
+                        }),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Tooltip(
+                      message: 'Adicionar livro',
+                      child: FloatingActionButton.small(
+                        heroTag: 'add_book_inline',
+                        onPressed: _controller.selectedGenre == null
+                            ? () => _showSnackBar(
+                                'Selecione um gênero antes de adicionar um livro.',
+                              )
+                            : _addBook,
+                        child: const Icon(Icons.add),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
