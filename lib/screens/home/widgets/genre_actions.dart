@@ -22,20 +22,20 @@ class GenreActions extends StatelessWidget {
         ElevatedButton.icon(
           onPressed: onAdd,
           icon: const Icon(Icons.add),
-          label: const Text('Add Genre'),
+          label: const Text('Adicionar gênero'),
         ),
         if (selectedGenre != null) ...[
           const SizedBox(height: 10),
           ElevatedButton.icon(
             onPressed: onEdit,
             icon: const Icon(Icons.edit),
-            label: const Text('Edit Genre'),
+            label: const Text('Editar gênero'),
           ),
           const SizedBox(height: 10),
           FilledButton.icon(
             onPressed: onDelete,
             icon: const Icon(Icons.delete),
-            label: const Text('Delete Genre'),
+            label: const Text('Excluir gênero'),
           ),
         ],
       ],

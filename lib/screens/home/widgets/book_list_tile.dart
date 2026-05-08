@@ -24,12 +24,12 @@ class BookListTile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            tooltip: 'Edit',
+            tooltip: 'Editar',
             icon: const Icon(Icons.edit, color: Colors.blue),
             onPressed: onEdit,
           ),
           IconButton(
-            tooltip: 'Delete',
+            tooltip: 'Excluir',
             icon: const Icon(Icons.delete, color: Colors.red),
             onPressed: onDelete,
           ),
