@@ -29,7 +29,7 @@ Future<String?> showTextDialog(
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(null),
-          child: const Text('Cancel'),
+          child: const Text('Cancelar'),
         ),
         FilledButton(
           onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
@@ -47,7 +47,7 @@ Future<bool> showConfirmationDialog(
   BuildContext context, {
   required String title,
   required String message,
-  String confirmButtonText = 'Confirm',
+  String confirmButtonText = 'Confirmar',
 }) async {
   final result = await showDialog<bool>(
     context: context,
@@ -57,7 +57,7 @@ Future<bool> showConfirmationDialog(
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(false),
-          child: const Text('Cancel'),
+          child: const Text('Cancelar'),
         ),
         FilledButton(
           onPressed: () => Navigator.of(ctx).pop(true),
