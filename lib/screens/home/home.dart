@@ -43,6 +43,28 @@ class _HomeState extends State<Home> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: const Text('Biblioteca'),
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF8B5CF6), Color(0xFF6366F1)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh_rounded),
+          tooltip: 'Recarregar',
+          onPressed: _reloadData,
+        ),
+      ],
+    );
+  }
+
   Future<void> _reloadData() async {
     final reloadFuture = _controller.initialize();
     setState(() {});
@@ -163,15 +185,7 @@ class _HomeState extends State<Home> {
     // Loading state — shown only on first fetch
     if (_controller.isLoading) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'Biblioteca',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
-            ),
-          ),
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        ),
+        appBar: _buildAppBar(),
         body: AppLoading(label: "Carregando...")
       );
     }
@@ -179,15 +193,7 @@ class _HomeState extends State<Home> {
     // Error state
     if (_controller.status == LibraryStatus.error) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'Biblioteca',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
-            ),
-          ),
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        ),
+        appBar: _buildAppBar(),
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -214,22 +220,7 @@ class _HomeState extends State<Home> {
     final books = _controller.filteredBooks;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Biblioteca',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onPrimaryContainer,
-          ),
-        ),
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Recarregar',
-            onPressed: _reloadData,
-          ),
-        ],
-      ),
+      appBar: _buildAppBar(),
       floatingActionButton: FloatingActionButton(
         onPressed: _controller.selectedGenre == null
             ? () => _showSnackBar('Selecione um gênero antes de adicionar um livro.')
@@ -238,28 +229,37 @@ class _HomeState extends State<Home> {
         child: const Icon(Icons.add),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            GenreDropdown(
-              genres: _controller.genres,
-              selectedGenre: _controller.selectedGenre,
-              onChanged: (selection) => setState(() {
-                _controller.selectGenre(selection);
-                _searchController.clear();
-              }),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: GenreDropdown(
+                  genres: _controller.genres,
+                  selectedGenre: _controller.selectedGenre,
+                  onChanged: (selection) => setState(() {
+                    _controller.selectGenre(selection);
+                    _searchController.clear();
+                  }),
+                ),
+              ),
             ),
             const SizedBox(height: 12),
-            TextField(
-              controller: _searchController,
-              enabled: _controller.selectedGenre != null,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.search),
-                hintText: 'Buscar livro',
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: TextField(
+                  controller: _searchController,
+                  enabled: _controller.selectedGenre != null,
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.search),
+                    hintText: 'Buscar livro',
+                  ),
+                  onChanged: (text) =>
+                      setState(() => _controller.updateSearch(text)),
+                ),
               ),
-              onChanged: (text) =>
-                  setState(() => _controller.updateSearch(text)),
             ),
             const SizedBox(height: 20),
             Expanded(
