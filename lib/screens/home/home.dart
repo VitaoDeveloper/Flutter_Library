@@ -43,6 +43,13 @@ class _HomeState extends State<Home> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
+  Future<void> _reloadData() async {
+    final reloadFuture = _controller.initialize();
+    setState(() {});
+    await reloadFuture;
+    if (mounted) setState(() {});
+  }
+
   // ---------------------------------------------------------------------------
   // Book actions
   // ---------------------------------------------------------------------------
@@ -188,16 +195,14 @@ class _HomeState extends State<Home> {
               const Icon(Icons.wifi_off, size: 48, color: Colors.red),
               const SizedBox(height: 16),
               Text(
-                _controller.errorMessage ?? 'Unknown error.',
+                _controller.errorMessage ?? 'Não foi possível carregar os dados.',
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
-                onPressed: () => _controller
-                    .initialize()
-                    .then((_) => setState(() {})),
+                onPressed: _reloadData,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Try again'),
+                label: const Text('Tentar novamente'),
               ),
             ],
           ),
@@ -221,7 +226,7 @@ class _HomeState extends State<Home> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Reload',
-            onPressed: _controller.initialize,
+            onPressed: _reloadData,
           ),
         ],
       ),
