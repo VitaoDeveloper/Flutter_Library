@@ -1,22 +1,22 @@
-# 📚 Biblioteca Flutter
+# Biblioteca Flutter
 
 Aplicativo mobile desenvolvido em **Flutter** para gerenciamento de uma biblioteca pessoal, permitindo organizar livros por gêneros com operações completas de CRUD.
 
 ---
 
-## ✨ Funcionalidades
+## Funcionalidades
 
 | Recurso | Descrição |
 |---------|-----------|
-| 📖 **Gerenciar Livros** | Adicionar, editar, excluir e buscar livros |
-| 🏷️ **Gerenciar Gêneros** | Criar, renomear e remover categorias |
-| 🔍 **Busca em Tempo Real** | Filtrar livros por nome instantaneamente |
-| 📱 **Design Moderno** | Interface com Material 3 e tema personalizado |
-| 🔄 **Sincronização com API** | Dados persistidos em backend REST |
+| **Gerenciar Livros** | Adicionar, editar, excluir e buscar livros |
+| **Gerenciar Gêneros** | Criar, renomear e remover categorias |
+| **Busca em Tempo Real** | Filtrar livros por nome instantaneamente |
+| **Design Moderno** | Interface com Material 3 e tema personalizado |
+| **Sincronização com API** | Dados persistidos em backend REST |
 
 ---
 
-## 🛠️ Tecnologias
+## Tecnologias
 
 - **Flutter** >= 3.x
 - **Dart** >= 3.6.2
@@ -25,7 +25,7 @@ Aplicativo mobile desenvolvido em **Flutter** para gerenciamento de uma bibliote
 
 ---
 
-## 🚀 Como Executar
+## Como Executar
 
 ### Pré-requisitos
 
@@ -50,7 +50,7 @@ flutter run
 
 ---
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 lib/
@@ -76,12 +76,16 @@ lib/
 
 ---
 
-## 🌐 API
+## API
 
 O app se comunica com uma API REST hospedada em:
-
 ```
 https://library-api-service.vercel.app
+```
+
+Código-Fonte da API disponível no repositório GitHub:
+```
+https://github.com/VitaoDeveloper/Library_API_Service
 ```
 
 ### Endpoints
@@ -90,12 +94,12 @@ https://library-api-service.vercel.app
 |--------|----------|-----------|
 | `GET` | `/getall` | Buscar todos os gêneros e livros |
 | `POST` | `/create/{table}` | Criar livro ou gênero |
-| `PATCH` | `/edit/{table}/{name}` | Editar livro ou gênero |
-| `DELETE` | `/delete/{table}/{name}` | Excluir livro ou gênero |
+| `PATCH` | `/edit/{table}/{id}` | Editar livro ou gênero |
+| `DELETE` | `/delete/{table}/{id}` | Excluir livro ou gênero |
 
 ---
 
-## 🏗️ Arquitetura
+## Arquitetura
 
 O projeto segue o padrão **MVC adaptado**:
 
@@ -106,20 +110,10 @@ O projeto segue o padrão **MVC adaptado**:
 
 ---
 
-## 🤝 Contribuir
+## Contribuir
 
 1. Faça um fork do projeto
 2. Crie uma branch (`git checkout -b feature/nova-feature`)
 3. Commit suas mudanças (`git commit -m 'feat: Adiciona nova feature'`)
 4. Push para a branch (`git push origin feature/nova-feature`)
 5. Abra um Pull Request
-
----
-
-## 📄 Licença
-
-Este projeto é destinado fins educacionais.
-
----
-
-**Feito com 💜 por [VitaoDeveloper](https://github.com/VitaoDeveloper)**
