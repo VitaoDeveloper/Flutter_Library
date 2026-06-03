@@ -1,122 +1,125 @@
-# Biblioteca Simples
+# 📚 Biblioteca Flutter
 
-Aplicativo desenvolvido em Flutter que simula um sistema básico de gerenciamento de biblioteca.
-Este projeto tem como objetivo servir como base para aprendizado, explorando conceitos de desenvolvimento mobile, organização de código e boas práticas.
-
----
-
-## Introdução
-
-Este app funciona como uma plataforma simples para gerenciar uma biblioteca, permitindo:
-
-* Cadastro de livros
-* Listagem e organização de itens
-* Estrutura inicial para controle de dados
-
-O foco principal não é ser uma solução completa, mas sim um projeto didático para fins acadêmicos e de ensino.
+Aplicativo mobile desenvolvido em **Flutter** para gerenciamento de uma biblioteca pessoal, permitindo organizar livros por gêneros com operações completas de CRUD.
 
 ---
 
-## Tecnologias Utilizadas
+## ✨ Funcionalidades
 
-* Flutter
-* Dart
-* (Opcional) Firebase ou outro backend, caso implementado
+| Recurso | Descrição |
+|---------|-----------|
+| 📖 **Gerenciar Livros** | Adicionar, editar, excluir e buscar livros |
+| 🏷️ **Gerenciar Gêneros** | Criar, renomear e remover categorias |
+| 🔍 **Busca em Tempo Real** | Filtrar livros por nome instantaneamente |
+| 📱 **Design Moderno** | Interface com Material 3 e tema personalizado |
+| 🔄 **Sincronização com API** | Dados persistidos em backend REST |
 
 ---
 
-## Como Rodar o Projeto Localmente
+## 🛠️ Tecnologias
+
+- **Flutter** >= 3.x
+- **Dart** >= 3.6.2
+- **Dio** - Cliente HTTP para comunicação com a API
+- **Material 3** - Design system moderno
+
+---
+
+## 🚀 Como Executar
 
 ### Pré-requisitos
 
-* Flutter instalado (>= 3.x)
-* Dart (>= 3.x)
-* Emulador Android/iOS ou dispositivo físico
+- [Flutter SDK](https://flutter.dev/docs/get-started/install) instalado
+- Emulador Android/iOS ou dispositivo físico conectado
 
-### Passos
+### Instalação
 
 ```bash
 # Clone o repositório
-git clone https://github.com/VitaoDeveloper/Biblioteca_Flutter.git
+git clone https://github.com/VitaoDeveloper/Flutter_Library.git
 
 # Acesse a pasta do projeto
-cd Biblioteca_Flutter
+cd Flutter_Library
 
 # Instale as dependências
 flutter pub get
 
-# Execute o projeto
+# Execute o app
 flutter run
 ```
 
 ---
 
-## Estrutura do Projeto
+## 📁 Estrutura do Projeto
 
-``` bash
+```
 lib/
-├── main.dart                          # Entrada mínima
-├── app.dart                           # BibliotecaApp (MaterialApp)
+├── main.dart                          # Ponto de entrada
+├── app.dart                           # Configuração do MaterialApp
+├── api/
+│   └── api_client.dart                # Cliente HTTP (Dio)
 ├── controllers/
-│   └── biblioteca_controller.dart     # Toda lógica de estado
-└── screens/
-    └── biblioteca_home/
-        ├── biblioteca_home.dart       # StatefulWidget + State
-        └── widgets/
-            ├── main_dropdown.dart
-            └── livro_list_tile.dart   # Regras de negócio / integração
+│   └── library_controller.dart        # Lógica de negócio e estado
+├── screens/
+│   └── home/
+│       ├── home.dart                  # Tela principal
+│       └── widgets/                   # Widgets da home
+├── services/
+│   └── library_service.dart           # Camada de serviço (API)
+└── utils/
+    ├── api/
+    │   ├── api_errors.dart            # Tratamento de erros
+    │   └── api_result.dart            # Wrapper de resultado
+    └── widgets/
+        └── app_loading.dart           # Widget de loading
 ```
 
 ---
 
-## Contribuição
+## 🌐 API
 
-Mesmo sendo um projeto acadêmico, contribuições são bem-vindas!
+O app se comunica com uma API REST hospedada em:
 
-### Como contribuir:
+```
+https://library-api-service.vercel.app
+```
+
+### Endpoints
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| `GET` | `/getall` | Buscar todos os gêneros e livros |
+| `POST` | `/create/{table}` | Criar livro ou gênero |
+| `PATCH` | `/edit/{table}/{name}` | Editar livro ou gênero |
+| `DELETE` | `/delete/{table}/{name}` | Excluir livro ou gênero |
+
+---
+
+## 🏗️ Arquitetura
+
+O projeto segue o padrão **MVC adaptado**:
+
+- **Controllers** → Gerenciam estado com `ChangeNotifier`
+- **Services** → Comunicação com a API
+- **Screens** → Interface do usuário
+- **Utils** → Helpers e utilitários
+
+---
+
+## 🤝 Contribuir
 
 1. Faça um fork do projeto
-2. Crie uma branch:
-
-   ```bash
-   git checkout -b minha-feature
-   ```
-3. Commit suas mudanças:
-
-   ```bash
-   git commit -m "feat: Nova Feature"
-   ```
-4. Envie para o repositório:
-
-   ```bash
-   git push origin minha-feature
-   ```
+2. Crie uma branch (`git checkout -b feature/nova-feature`)
+3. Commit suas mudanças (`git commit -m 'feat: Adiciona nova feature'`)
+4. Push para a branch (`git push origin feature/nova-feature`)
 5. Abra um Pull Request
 
-### Boas práticas:
+---
 
-* Use nomes de variáveis claros
-* Siga o padrão de organização do projeto
-* Prefira commits descritivos
+## 📄 Licença
+
+Este projeto é destinado fins educacionais.
 
 ---
 
-## Aviso
-
-Este projeto **não possui licença** e foi desenvolvido **exclusivamente para fins acadêmicos e de ensino**.
-Não deve ser utilizado em produção.
-
----
-
-## Issue Relacionada
-
-**Melhorar a documentação no README do projeto**
-
-Este README foi estruturado com base na necessidade de tornar a documentação mais clara e acessível para novos desenvolvedores, incluindo:
-
-* Melhor descrição do projeto
-* Guia de execução local
-* Organização do código
-* Diretrizes de contribuição
-
----
+**Feito com 💜 por [VitaoDeveloper](https://github.com/VitaoDeveloper)**
