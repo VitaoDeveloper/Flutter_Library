@@ -1,122 +1,123 @@
-# Biblioteca Simples
+# Simple Library
 
-Aplicativo desenvolvido em Flutter que simula um sistema básico de gerenciamento de biblioteca.
-Este projeto tem como objetivo servir como base para aprendizado, explorando conceitos de desenvolvimento mobile, organização de código e boas práticas.
-
----
-
-## Introdução
-
-Este app funciona como uma plataforma simples para gerenciar uma biblioteca, permitindo:
-
-* Cadastro de livros
-* Listagem e organização de itens
-* Estrutura inicial para controle de dados
-
-O foco principal não é ser uma solução completa, mas sim um projeto didático para fins acadêmicos e de ensino.
+A Flutter application that simulates a basic library management system.
+This project is intended to serve as a learning foundation, exploring mobile development concepts, code organization, and good practices.
 
 ---
 
-## Tecnologias Utilizadas
+## Introduction
+
+This app works as a simple platform for managing a library, allowing users to:
+
+* Register books
+* List and organize items
+* Use an initial structure for data management
+
+The main goal is not to be a complete production-ready solution, but rather a didactic project for academic and educational purposes.
+
+---
+
+## Technologies Used
 
 * Flutter
 * Dart
-* (Opcional) Firebase ou outro backend, caso implementado
+* (Optional) Firebase or another backend, if implemented
 
 ---
 
-## Como Rodar o Projeto Localmente
+## How to Run the Project Locally
 
-### Pré-requisitos
+### Prerequisites
 
-* Flutter instalado (>= 3.x)
-* Dart (>= 3.x)
-* Emulador Android/iOS ou dispositivo físico
+* Flutter installed (>= 3.x)
+* Dart installed (>= 3.x)
+* Android/iOS emulator or physical device
 
-### Passos
+### Steps
 
 ```bash
-# Clone o repositório
+# Clone the repository
 git clone https://github.com/VitaoDeveloper/Biblioteca_Flutter.git
 
-# Acesse a pasta do projeto
+# Access the project folder
 cd Biblioteca_Flutter
 
-# Instale as dependências
+# Install dependencies
 flutter pub get
 
-# Execute o projeto
+# Run the project
 flutter run
 ```
 
 ---
 
-## Estrutura do Projeto
+## Project Structure
 
-``` bash
+```bash
 lib/
-├── main.dart                          # Entrada mínima
-├── app.dart                           # BibliotecaApp (MaterialApp)
+├── main.dart                          # Minimal entry point
+├── app.dart                           # App MaterialApp setup
 ├── controllers/
-│   └── biblioteca_controller.dart     # Toda lógica de estado
+│   └── library_controller.dart        # State management and business logic
 └── screens/
-    └── biblioteca_home/
-        ├── biblioteca_home.dart       # StatefulWidget + State
+    └── home/
+        ├── home.dart                  # StatefulWidget + State
         └── widgets/
-            ├── main_dropdown.dart
-            └── livro_list_tile.dart   # Regras de negócio / integração
+            ├── genre_dropdown.dart
+            ├── genre_actions.dart
+            └── book_list_tile.dart    # Book list item and actions
 ```
 
 ---
 
-## Contribuição
+## Contribution
 
-Mesmo sendo um projeto acadêmico, contribuições são bem-vindas!
+Even though this is an academic project, contributions are welcome!
 
-### Como contribuir:
+### How to contribute:
 
-1. Faça um fork do projeto
-2. Crie uma branch:
-
-   ```bash
-   git checkout -b minha-feature
-   ```
-3. Commit suas mudanças:
+1. Fork the project
+2. Create a branch:
 
    ```bash
-   git commit -m "feat: Nova Feature"
+   git checkout -b my-feature
    ```
-4. Envie para o repositório:
+3. Commit your changes:
 
    ```bash
-   git push origin minha-feature
+   git commit -m "feat: New feature"
    ```
-5. Abra um Pull Request
+4. Push to your repository:
 
-### Boas práticas:
+   ```bash
+   git push origin my-feature
+   ```
+5. Open a Pull Request
 
-* Use nomes de variáveis claros
-* Siga o padrão de organização do projeto
-* Prefira commits descritivos
+### Best practices:
+
+* Use clear variable names
+* Follow the project's organization pattern
+* Prefer descriptive commits
 
 ---
 
-## Aviso
+## Notice
 
-Este projeto **não possui licença** e foi desenvolvido **exclusivamente para fins acadêmicos e de ensino**.
-Não deve ser utilizado em produção.
+This project **does not have a license** and was developed **exclusively for academic and educational purposes**.
+It should not be used in production.
 
 ---
 
-## Issue Relacionada
+## Related Issue
 
-**Melhorar a documentação no README do projeto**
+**Improve the project's README documentation**
 
-Este README foi estruturado com base na necessidade de tornar a documentação mais clara e acessível para novos desenvolvedores, incluindo:
+This README was structured based on the need to make the documentation clearer and more accessible for new developers, including:
 
-* Melhor descrição do projeto
-* Guia de execução local
-* Organização do código
-* Diretrizes de contribuição
+* Better project description
+* Local setup guide
+* Code organization
+* Contribution guidelines
 
 ---
