@@ -13,8 +13,8 @@ class LibraryService {
     defaultValue: ApiClient.defaultBaseUrl,
   );
 
-  /// Returns a list of [Genre], each containing its [Book]s.
-  Future<ApiResult<List<Genre>>> getAll() async {
+  /// Returns raw map: { "Fiction": ["Book A", "Book B"], ... }
+  Future<ApiResult<Map<String, List<String>>>> getAll() async {
     try {
       final response = await api.get('/getall');
       final raw = response.data as List<dynamic>;
@@ -54,9 +54,9 @@ class LibraryService {
     required Map<String, dynamic> body,
   }) async {
     try {
-      final encodedId = Uri.encodeComponent(id);
+      final encodedName = Uri.encodeComponent(currentName);
       final response = await api.patch(
-        '$_mutationsBaseUrl/edit/$table/$encodedId',
+        '$_mutationsBaseUrl/edit/$table/$encodedName',
         data: body,
       );
       return ApiResult.success(response.data as Map<String, dynamic>);
@@ -74,8 +74,9 @@ class LibraryService {
     required String id,
   }) async {
     try {
-      final encodedId = Uri.encodeComponent(id);
-      final response = await api.delete('$_mutationsBaseUrl/delete/$table/$encodedId');
+      final encodedName = Uri.encodeComponent(name);
+      final response =
+          await api.delete('$_mutationsBaseUrl/delete/$table/$encodedName');
       return ApiResult.success(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       return ApiResult.failure(apiErrors.handleError(e));

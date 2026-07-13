@@ -42,7 +42,7 @@ class _HomeState extends State<Home> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      title: const Text('Biblioteca'),
+      title: const Text('Library'),
       flexibleSpace: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -55,7 +55,7 @@ class _HomeState extends State<Home> {
       actions: [
         IconButton(
           icon: const Icon(Icons.refresh_rounded),
-          tooltip: 'Recarregar',
+          tooltip: 'Reload',
           onPressed: _reloadData,
         ),
       ],
@@ -76,9 +76,9 @@ class _HomeState extends State<Home> {
   Future<void> _addBook() async {
     final name = await showTextDialog(
       context,
-      title: 'Adicionar livro',
-      fieldLabel: 'Nome do livro',
-      confirmButtonText: 'Adicionar',
+      title: 'Add book',
+      fieldLabel: 'Book name',
+      confirmButtonText: 'Add',
     );
     if (name == null) return;
 
@@ -92,9 +92,9 @@ class _HomeState extends State<Home> {
     final currentName = _controller.booksInSelectedGenre[index].name;
     final newName = await showTextDialog(
       context,
-      title: 'Editar livro',
-      fieldLabel: 'Nome do livro',
-      confirmButtonText: 'Salvar',
+      title: 'Edit book',
+      fieldLabel: 'Book name',
+      confirmButtonText: 'Save',
       initialText: currentName,
     );
     if (newName == null) return;
@@ -109,9 +109,9 @@ class _HomeState extends State<Home> {
     final name = _controller.booksInSelectedGenre[index].name;
     final confirmed = await showConfirmationDialog(
       context,
-      title: 'Excluir livro',
-      message: 'Tem certeza que deseja excluir "$name"?',
-      confirmButtonText: 'Excluir',
+      title: 'Delete book',
+      message: 'Are you sure you want to delete "$name"?',
+      confirmButtonText: 'Delete',
     );
     if (!confirmed) return;
 
@@ -128,9 +128,9 @@ class _HomeState extends State<Home> {
   Future<void> _addGenre() async {
     final name = await showTextDialog(
       context,
-      title: 'Adicionar gênero',
-      fieldLabel: 'Nome do gênero',
-      confirmButtonText: 'Adicionar',
+      title: 'Add genre',
+      fieldLabel: 'Genre name',
+      confirmButtonText: 'Add',
     );
     if (name == null) return;
 
@@ -144,9 +144,9 @@ class _HomeState extends State<Home> {
     final currentName = _controller.selectedGenre!.name;
     final newName = await showTextDialog(
       context,
-      title: 'Editar gênero',
-      fieldLabel: 'Nome do gênero',
-      confirmButtonText: 'Salvar',
+      title: 'Edit genre',
+      fieldLabel: 'Genre name',
+      confirmButtonText: 'Save',
       initialText: currentName,
     );
     if (newName == null) return;
@@ -161,9 +161,9 @@ class _HomeState extends State<Home> {
     final name = _controller.selectedGenre!.name;
     final confirmed = await showConfirmationDialog(
       context,
-      title: 'Excluir gênero',
-      message: 'Tem certeza que deseja excluir "$name"?',
-      confirmButtonText: 'Excluir',
+      title: 'Delete genre',
+      message: 'Are you sure you want to delete "$name"?',
+      confirmButtonText: 'Delete',
     );
     if (!confirmed) return;
 
@@ -183,7 +183,7 @@ class _HomeState extends State<Home> {
     if (_controller.isLoading) {
       return Scaffold(
         appBar: _buildAppBar(),
-        body: const AppLoading(label: 'Carregando...'),
+        body: AppLoading(label: "Loading...")
       );
     }
 
@@ -198,7 +198,7 @@ class _HomeState extends State<Home> {
               const Icon(Icons.wifi_off, size: 48, color: Colors.red),
               const SizedBox(height: 16),
               Text(
-                _controller.errorMessage ?? 'Não foi possível carregar os dados.',
+                _controller.errorMessage ?? 'Unable to load the data.',
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -239,12 +239,12 @@ class _HomeState extends State<Home> {
                     ),
                     const SizedBox(width: 10),
                     Tooltip(
-                      message: 'Adicionar livro',
+                      message: 'Add book',
                       child: FloatingActionButton.small(
                         heroTag: 'add_book_inline',
                         onPressed: _controller.selectedGenre == null
                             ? () => _showSnackBar(
-                                'Selecione um gênero antes de adicionar um livro.',
+                                'Select a genre before adding a book.',
                               )
                             : _addBook,
                         child: const Icon(Icons.add),
@@ -263,7 +263,7 @@ class _HomeState extends State<Home> {
                   enabled: _controller.selectedGenre != null,
                   decoration: const InputDecoration(
                     prefixIcon: Icon(Icons.search),
-                    hintText: 'Buscar livro',
+                    hintText: 'Search book',
                   ),
                   onChanged: (text) =>
                       setState(() => _controller.updateSearch(text)),
@@ -273,7 +273,7 @@ class _HomeState extends State<Home> {
             const SizedBox(height: 20),
             Expanded(
               child: books.isEmpty
-                  ? const Center(child: Text('Nenhum resultado.'))
+                  ? const Center(child: Text('No results found.'))
                   : ListView.separated(
                       itemCount: books.length,
                       separatorBuilder: (_, __) => const Divider(height: 1),

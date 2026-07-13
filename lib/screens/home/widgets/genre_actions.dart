@@ -23,7 +23,7 @@ class GenreActions extends StatelessWidget {
           child: ElevatedButton.icon(
             onPressed: onAdd,
             icon: const Icon(Icons.add),
-            label: const Text('Adicionar gênero'),
+            label: const Text('Add genre'),
           ),
         ),
         if (selectedGenre != null) ...[
@@ -31,13 +31,13 @@ class GenreActions extends StatelessWidget {
           FilledButton.tonalIcon(
             onPressed: onEdit,
             icon: const Icon(Icons.edit),
-            label: const Text('Editar'),
+            label: const Text('Edit'),
           ),
           const SizedBox(width: 8),
           FilledButton.icon(
             onPressed: onDelete,
             icon: const Icon(Icons.delete),
-            label: const Text('Excluir'),
+            label: const Text('Delete'),
           ),
         ],
       ],

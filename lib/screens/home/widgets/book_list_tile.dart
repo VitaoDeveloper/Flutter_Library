@@ -26,17 +26,17 @@ class BookListTile extends StatelessWidget {
           backgroundColor: Colors.deepPurple.shade50,
           child: Icon(Icons.book_rounded, color: Colors.deepPurple.shade400),
         ),
-        title: Text(book.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+        title: Text(book, style: const TextStyle(fontWeight: FontWeight.w600)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              tooltip: 'Editar',
+              tooltip: 'Edit',
               icon: const Icon(Icons.edit_rounded, color: Colors.blue),
               onPressed: onEdit,
             ),
             IconButton(
-              tooltip: 'Excluir',
+              tooltip: 'Delete',
               icon: const Icon(Icons.delete_rounded, color: Colors.red),
               onPressed: onDelete,
             ),

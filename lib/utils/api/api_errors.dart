@@ -5,15 +5,15 @@ class ApiErrors {
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.receiveTimeout:
-        return 'Tempo de conexão esgotado. Verifique sua internet e tente novamente.';
+        return 'The request timed out. Check your connection and try again.';
       case DioExceptionType.badResponse:
         final status = e.response?.statusCode;
         final message = _extractMessage(e.response?.data);
         return _mapStatusToMessage(status, message);
       case DioExceptionType.connectionError:
-        return 'Não foi possível conectar ao servidor.';
+        return 'Unable to connect to the server.';
       default:
-        return 'Erro de rede. Tente novamente.';
+        return 'Network error. Please try again.';
     }
   }
 
@@ -27,24 +27,24 @@ class ApiErrors {
     if (responseData is String && responseData.trim().isNotEmpty) {
       return responseData.trim();
     }
-    return 'Sem detalhes adicionais.';
+    return 'No additional details.';
   }
 
   String _mapStatusToMessage(int? status, String apiMessage) {
     switch (status) {
       case 400:
-        return 'Dados inválidos para esta operação. $apiMessage';
+        return 'The information provided is invalid. $apiMessage';
       case 404:
-        return 'Registro não encontrado ou rota inválida. $apiMessage';
+        return 'The requested record was not found. $apiMessage';
       case 409:
         if (_isGenreWithBooksConflict(apiMessage)) {
-          return 'Não é possível excluir o gênero porque ele ainda possui livros cadastrados.';
+          return 'This genre cannot be deleted because it still has registered books.';
         }
-        return 'Conflito de dados. Esse registro já existe ou está vinculado a outro. $apiMessage';
+        return 'Data conflict. This record already exists or is linked to another item. $apiMessage';
       case 500:
-        return 'Erro interno no servidor. Tente novamente em instantes.';
+        return 'Server error. Please try again shortly.';
       default:
-        return 'Falha na operação (HTTP $status). $apiMessage';
+        return 'The operation failed (HTTP $status). $apiMessage';
     }
   }
 
@@ -53,7 +53,7 @@ class ApiErrors {
     return lower.contains('foreign key') ||
         lower.contains('constraint') ||
         lower.contains('related') ||
-        lower.contains('livro') ||
-        lower.contains('book');
+        lower.contains('book') ||
+        lower.contains('books');
   }
 }

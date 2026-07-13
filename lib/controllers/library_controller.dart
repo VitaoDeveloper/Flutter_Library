@@ -86,16 +86,14 @@ class LibraryController extends ChangeNotifier {
 
   /// Returns [null] on success or an error message.
   Future<String?> addBook(String name) async {
-    if (selectedGenre == null) {
-      return 'Selecione um gênero antes de adicionar um livro.';
-    }
+    if (selectedGenre == null) return 'Select a genre before adding a book.';
     final normalized = _capitalize(name.trim());
-    if (normalized.isEmpty) return 'O nome não pode ficar vazio.';
-    if (_bookExists(normalized)) return 'Já existe um livro com esse nome.';
+    if (normalized.isEmpty) return 'The name cannot be empty.';
+    if (_bookExists(normalized)) return 'A book with that name already exists.';
 
     final result = await _service.create(
       table: 'books',
-      body: {'name': normalized, 'genre_id': selectedGenre!.id},
+      body: {'name': normalized, 'genre': selectedGenre},
     );
 
     if (!result.isSuccess) return result.error;
@@ -110,9 +108,13 @@ class LibraryController extends ChangeNotifier {
 
   /// Returns [null] on success or an error message.
   Future<String?> editBook(int index, String newName) async {
-    final book = booksInSelectedGenre[index];
+    final books = booksInSelectedGenre;
+    if (index < 0 || index >= books.length) return 'The selected book is invalid.';
+
     final normalized = _capitalize(newName.trim());
-    if (normalized.isEmpty) return 'O nome não pode ficar vazio.';
+    if (normalized.isEmpty) return 'The name cannot be empty.';
+
+    final currentName = books[index];
     if (_bookExists(normalized) &&
         normalized.toLowerCase() != book.name.toLowerCase()) {
       return 'Já existe um livro com esse nome.';
@@ -120,7 +122,7 @@ class LibraryController extends ChangeNotifier {
 
     final result = await _service.edit(
       table: 'books',
-      id: book.id,
+      currentName: currentName,
       body: {'update': normalized},
     );
 
@@ -148,8 +150,8 @@ class LibraryController extends ChangeNotifier {
 
   Future<String?> addGenre(String name) async {
     final normalized = _capitalize(name.trim());
-    if (normalized.isEmpty) return 'O nome não pode ficar vazio.';
-    if (_genreExists(normalized)) return 'Esse gênero já existe.';
+    if (normalized.isEmpty) return 'The name cannot be empty.';
+    if (genres.containsKey(normalized)) return 'A genre with that name already exists.';
 
     final result = await _service.create(
       table: 'genres',
@@ -171,15 +173,15 @@ class LibraryController extends ChangeNotifier {
 
   Future<String?> editGenre(String newName) async {
     final normalized = _capitalize(newName.trim());
-    if (normalized.isEmpty) return 'O nome não pode ficar vazio.';
-    if (_genreExists(normalized) &&
-        normalized.toLowerCase() != selectedGenre!.name.toLowerCase()) {
-      return 'Esse gênero já existe.';
+    if (normalized.isEmpty) return 'The name cannot be empty.';
+    if (genres.containsKey(normalized) &&
+        normalized.toLowerCase() != currentName.toLowerCase()) {
+      return 'A genre with that name already exists.';
     }
 
     final result = await _service.edit(
       table: 'genres',
-      id: selectedGenre!.id,
+      currentName: currentName,
       body: {'update': normalized},
     );
 
