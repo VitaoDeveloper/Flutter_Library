@@ -1,4 +1,4 @@
-# Simple Library
+# Flutter Library
 
 A Flutter application that simulates a basic library management system.
 This project is intended to serve as a learning foundation, exploring mobile development concepts, code organization, and good practices.

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../models/genre.dart';
 
 /// Dropdown for selecting a literary genre.
 class GenreDropdown extends StatelessWidget {
@@ -9,31 +10,31 @@ class GenreDropdown extends StatelessWidget {
     required this.onChanged,
   });
 
-  final Map<String, List<String>> genres;
-  final String? selectedGenre;
-  final ValueChanged<String?> onChanged;
+  final List<Genre> genres;
+  final Genre? selectedGenre;
+  final ValueChanged<Genre?> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
+    return DropdownButtonFormField<Genre>(
       hint: const Row(
         children: [
           Icon(Icons.bookmark),
           SizedBox(width: 8),
-          Text('Select a genre'),
+          Text('Selecione um gênero'),
         ],
       ),
       initialValue: selectedGenre,
       decoration: const InputDecoration(border: OutlineInputBorder()),
       icon: const Icon(Icons.arrow_drop_down),
-      items: genres.keys.map((genre) {
-        return DropdownMenuItem<String>(
+      items: genres.map((genre) {
+        return DropdownMenuItem<Genre>(
           value: genre,
           child: Row(
             children: [
               const Icon(Icons.bookmark),
               const SizedBox(width: 8),
-              Text(genre),
+              Text(genre.name),
             ],
           ),
         );

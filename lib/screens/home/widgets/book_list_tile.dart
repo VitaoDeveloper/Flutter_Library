@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../models/book.dart';
 
 /// Book item displayed in the list, with edit and delete actions.
 class BookListTile extends StatelessWidget {
@@ -10,7 +11,7 @@ class BookListTile extends StatelessWidget {
     required this.onDelete,
   });
 
-  final String book;
+  final Book book;
   final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onDelete;

@@ -82,14 +82,14 @@ class _HomeState extends State<Home> {
     );
     if (name == null) return;
 
-    _showSnackBar('Saving...');
+    _showSnackBar('Salvando...');
     final error = await _controller.addBook(name);
-    _showSnackBar(error ?? 'Book added.');
+    _showSnackBar(error ?? 'Livro adicionado.');
     if (error == null) setState(() {});
   }
 
   Future<void> _editBook(int index) async {
-    final currentName = _controller.booksInSelectedGenre[index];
+    final currentName = _controller.booksInSelectedGenre[index].name;
     final newName = await showTextDialog(
       context,
       title: 'Edit book',
@@ -99,14 +99,14 @@ class _HomeState extends State<Home> {
     );
     if (newName == null) return;
 
-    _showSnackBar('Saving...');
+    _showSnackBar('Salvando...');
     final error = await _controller.editBook(index, newName);
-    _showSnackBar(error ?? 'Book updated.');
+    _showSnackBar(error ?? 'Livro atualizado.');
     if (error == null) setState(() {});
   }
 
   Future<void> _deleteBook(int index) async {
-    final name = _controller.booksInSelectedGenre[index];
+    final name = _controller.booksInSelectedGenre[index].name;
     final confirmed = await showConfirmationDialog(
       context,
       title: 'Delete book',
@@ -115,9 +115,9 @@ class _HomeState extends State<Home> {
     );
     if (!confirmed) return;
 
-    _showSnackBar('Deleting...');
+    _showSnackBar('Excluindo...');
     final error = await _controller.deleteBook(index);
-    _showSnackBar(error ?? 'Book "$name" deleted.');
+    _showSnackBar(error ?? 'Livro "$name" excluído.');
     if (error == null) setState(() {});
   }
 
@@ -134,14 +134,14 @@ class _HomeState extends State<Home> {
     );
     if (name == null) return;
 
-    _showSnackBar('Saving...');
+    _showSnackBar('Salvando...');
     final error = await _controller.addGenre(name);
-    _showSnackBar(error ?? 'Genre added.');
+    _showSnackBar(error ?? 'Gênero adicionado.');
     if (error == null) setState(() {});
   }
 
   Future<void> _editGenre() async {
-    final currentName = _controller.selectedGenre!;
+    final currentName = _controller.selectedGenre!.name;
     final newName = await showTextDialog(
       context,
       title: 'Edit genre',
@@ -151,14 +151,14 @@ class _HomeState extends State<Home> {
     );
     if (newName == null) return;
 
-    _showSnackBar('Saving...');
-    final error = await _controller.editGenre(currentName, newName);
-    _showSnackBar(error ?? 'Genre updated.');
+    _showSnackBar('Salvando...');
+    final error = await _controller.editGenre(newName);
+    _showSnackBar(error ?? 'Gênero atualizado.');
     if (error == null) setState(() {});
   }
 
   Future<void> _deleteGenre() async {
-    final name = _controller.selectedGenre!;
+    final name = _controller.selectedGenre!.name;
     final confirmed = await showConfirmationDialog(
       context,
       title: 'Delete genre',
@@ -167,9 +167,9 @@ class _HomeState extends State<Home> {
     );
     if (!confirmed) return;
 
-    _showSnackBar('Deleting...');
-    final error = await _controller.deleteGenre(name);
-    _showSnackBar(error ?? 'Genre "$name" deleted.');
+    _showSnackBar('Excluindo...');
+    final error = await _controller.deleteGenre();
+    _showSnackBar(error ?? 'Gênero "$name" excluído.');
     if (error == null) setState(() {});
   }
 
@@ -205,7 +205,7 @@ class _HomeState extends State<Home> {
               ElevatedButton.icon(
                 onPressed: _reloadData,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Try again'),
+                label: const Text('Tentar novamente'),
               ),
             ],
           ),
@@ -279,11 +279,11 @@ class _HomeState extends State<Home> {
                       separatorBuilder: (_, __) => const Divider(height: 1),
                       itemBuilder: (context, filteredIndex) {
                         final book = books[filteredIndex];
-                        final realIndex =
-                            _controller.booksInSelectedGenre.indexOf(book);
+                        final realIndex = _controller.booksInSelectedGenre
+                            .indexWhere((b) => b.id == book.id);
                         return BookListTile(
                           book: book,
-                          onTap: () => _showSnackBar('Selected: $book'),
+                          onTap: () => _showSnackBar('Selecionado: ${book.name}'),
                           onEdit: () => _editBook(realIndex),
                           onDelete: () => _deleteBook(realIndex),
                         );
@@ -292,7 +292,7 @@ class _HomeState extends State<Home> {
             ),
             const SizedBox(height: 12),
             GenreActions(
-              selectedGenre: _controller.selectedGenre,
+              selectedGenre: _controller.selectedGenre?.name,
               onAdd: _addGenre,
               onEdit: _editGenre,
               onDelete: _deleteGenre,

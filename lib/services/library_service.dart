@@ -1,7 +1,8 @@
+import 'package:dio/dio.dart';
+import '../api/api_client.dart';
+import '../models/genre.dart';
 import '../utils/api/api_result.dart';
 import '../utils/api/api_errors.dart';
-import '../api/api_client.dart';
-import 'package:dio/dio.dart';
 
 class LibraryService {
   final api = ApiClient().client;
@@ -16,16 +17,11 @@ class LibraryService {
   Future<ApiResult<Map<String, List<String>>>> getAll() async {
     try {
       final response = await api.get('/getall');
-      final raw = response.data as Map<String, dynamic>;
-
-      final result = raw.map(
-        (genre, books) => MapEntry(
-          genre,
-          (books as List).map((b) => b.toString()).toList(),
-        ),
-      );
-
-      return ApiResult.success(result);
+      final raw = response.data as List<dynamic>;
+      final genres = raw
+          .map((g) => Genre.fromJson(g as Map<String, dynamic>))
+          .toList();
+      return ApiResult.success(genres);
     } on DioException catch (e) {
       return ApiResult.failure(apiErrors.handleError(e));
     } catch (e) {
@@ -34,6 +30,8 @@ class LibraryService {
   }
 
   /// [table]: 'books' or 'genres'
+  /// For books, body must include 'name' and 'genre_id'.
+  /// For genres, body must include 'name'.
   Future<ApiResult<Map<String, dynamic>>> create({
     required String table,
     required Map<String, dynamic> body,
@@ -49,10 +47,10 @@ class LibraryService {
   }
 
   /// [table]: 'books' or 'genres'
-  /// [currentName]: current name used in WHERE clause
+  /// [id]: UUID of the record to update.
   Future<ApiResult<Map<String, dynamic>>> edit({
     required String table,
-    required String currentName,
+    required String id,
     required Map<String, dynamic> body,
   }) async {
     try {
@@ -70,9 +68,10 @@ class LibraryService {
   }
 
   /// [table]: 'books' or 'genres'
+  /// [id]: UUID of the record to delete.
   Future<ApiResult<Map<String, dynamic>>> delete({
     required String table,
-    required String name,
+    required String id,
   }) async {
     try {
       final encodedName = Uri.encodeComponent(name);
