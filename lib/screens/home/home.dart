@@ -89,7 +89,7 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _editBook(int index) async {
-    final currentName = _controller.booksInSelectedGenre[index];
+    final currentName = _controller.booksInSelectedGenre[index].name;
     final newName = await showTextDialog(
       context,
       title: 'Editar livro',
@@ -106,7 +106,7 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _deleteBook(int index) async {
-    final name = _controller.booksInSelectedGenre[index];
+    final name = _controller.booksInSelectedGenre[index].name;
     final confirmed = await showConfirmationDialog(
       context,
       title: 'Excluir livro',
@@ -141,7 +141,7 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _editGenre() async {
-    final currentName = _controller.selectedGenre!;
+    final currentName = _controller.selectedGenre!.name;
     final newName = await showTextDialog(
       context,
       title: 'Editar gênero',
@@ -152,13 +152,13 @@ class _HomeState extends State<Home> {
     if (newName == null) return;
 
     _showSnackBar('Salvando...');
-    final error = await _controller.editGenre(currentName, newName);
+    final error = await _controller.editGenre(newName);
     _showSnackBar(error ?? 'Gênero atualizado.');
     if (error == null) setState(() {});
   }
 
   Future<void> _deleteGenre() async {
-    final name = _controller.selectedGenre!;
+    final name = _controller.selectedGenre!.name;
     final confirmed = await showConfirmationDialog(
       context,
       title: 'Excluir gênero',
@@ -168,7 +168,7 @@ class _HomeState extends State<Home> {
     if (!confirmed) return;
 
     _showSnackBar('Excluindo...');
-    final error = await _controller.deleteGenre(name);
+    final error = await _controller.deleteGenre();
     _showSnackBar(error ?? 'Gênero "$name" excluído.');
     if (error == null) setState(() {});
   }
@@ -183,7 +183,7 @@ class _HomeState extends State<Home> {
     if (_controller.isLoading) {
       return Scaffold(
         appBar: _buildAppBar(),
-        body: AppLoading(label: "Carregando...")
+        body: const AppLoading(label: 'Carregando...'),
       );
     }
 
@@ -279,11 +279,11 @@ class _HomeState extends State<Home> {
                       separatorBuilder: (_, __) => const Divider(height: 1),
                       itemBuilder: (context, filteredIndex) {
                         final book = books[filteredIndex];
-                        final realIndex =
-                            _controller.booksInSelectedGenre.indexOf(book);
+                        final realIndex = _controller.booksInSelectedGenre
+                            .indexWhere((b) => b.id == book.id);
                         return BookListTile(
                           book: book,
-                          onTap: () => _showSnackBar('Selecionado: $book'),
+                          onTap: () => _showSnackBar('Selecionado: ${book.name}'),
                           onEdit: () => _editBook(realIndex),
                           onDelete: () => _deleteBook(realIndex),
                         );
@@ -292,7 +292,7 @@ class _HomeState extends State<Home> {
             ),
             const SizedBox(height: 12),
             GenreActions(
-              selectedGenre: _controller.selectedGenre,
+              selectedGenre: _controller.selectedGenre?.name,
               onAdd: _addGenre,
               onEdit: _editGenre,
               onDelete: _deleteGenre,

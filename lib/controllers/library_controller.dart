@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import '../models/book.dart';
+import '../models/genre.dart';
 import '../services/library_service.dart';
 
 enum LibraryStatus { idle, loading, success, error }
@@ -19,11 +21,11 @@ class LibraryController extends ChangeNotifier {
 
   LibraryStatus _status = LibraryStatus.idle;
   String? _errorMessage;
-  String? selectedGenre;
+  Genre? selectedGenre;
   String searchQuery = '';
 
-  /// Source of truth: { genreName: [bookName, ...] }
-  final Map<String, List<String>> genres = {};
+  /// Source of truth: list of genres, each containing its books.
+  final List<Genre> genres = [];
 
   LibraryStatus get status => _status;
   String? get errorMessage => _errorMessage;
@@ -33,12 +35,12 @@ class LibraryController extends ChangeNotifier {
   // Derived state
   // ---------------------------------------------------------------------------
 
-  List<String> get booksInSelectedGenre => genres[selectedGenre] ?? const [];
+  List<Book> get booksInSelectedGenre => selectedGenre?.books ?? const [];
 
-  List<String> get filteredBooks {
+  List<Book> get filteredBooks {
     if (searchQuery.isEmpty) return booksInSelectedGenre;
     return booksInSelectedGenre
-        .where((b) => b.toLowerCase().contains(searchQuery.toLowerCase()))
+        .where((b) => b.name.toLowerCase().contains(searchQuery.toLowerCase()))
         .toList();
   }
 
@@ -67,7 +69,7 @@ class LibraryController extends ChangeNotifier {
   // Selection / search
   // ---------------------------------------------------------------------------
 
-  void selectGenre(String? genre) {
+  void selectGenre(Genre? genre) {
     selectedGenre = genre;
     searchQuery = '';
     notifyListeners();
@@ -84,58 +86,58 @@ class LibraryController extends ChangeNotifier {
 
   /// Returns [null] on success or an error message.
   Future<String?> addBook(String name) async {
-    if (selectedGenre == null) return 'Selecione um gênero antes de adicionar um livro.';
+    if (selectedGenre == null) {
+      return 'Selecione um gênero antes de adicionar um livro.';
+    }
     final normalized = _capitalize(name.trim());
     if (normalized.isEmpty) return 'O nome não pode ficar vazio.';
     if (_bookExists(normalized)) return 'Já existe um livro com esse nome.';
 
     final result = await _service.create(
       table: 'books',
-      body: {'name': normalized, 'genre': selectedGenre},
+      body: {'name': normalized, 'genre_id': selectedGenre!.id},
     );
 
     if (!result.isSuccess) return result.error;
 
-    genres[selectedGenre!]!.add(normalized);
+    selectedGenre!.books.add(Book(
+      id: result.data!['id'] as String,
+      name: normalized,
+    ));
     notifyListeners();
     return null;
   }
 
   /// Returns [null] on success or an error message.
   Future<String?> editBook(int index, String newName) async {
-    final books = booksInSelectedGenre;
-    if (index < 0 || index >= books.length) return 'Livro selecionado é inválido.';
-
+    final book = booksInSelectedGenre[index];
     final normalized = _capitalize(newName.trim());
     if (normalized.isEmpty) return 'O nome não pode ficar vazio.';
-
-    final currentName = books[index];
     if (_bookExists(normalized) &&
-        normalized.toLowerCase() != currentName.toLowerCase()) {
+        normalized.toLowerCase() != book.name.toLowerCase()) {
       return 'Já existe um livro com esse nome.';
     }
 
     final result = await _service.edit(
       table: 'books',
-      currentName: currentName,
+      id: book.id,
       body: {'update': normalized},
     );
 
     if (!result.isSuccess) return result.error;
 
-    books[index] = normalized;
+    selectedGenre!.books[index] = Book(id: book.id, name: normalized);
     notifyListeners();
     return null;
   }
 
   Future<String?> deleteBook(int index) async {
-    final books = booksInSelectedGenre;
-    final name = books[index];
+    final book = booksInSelectedGenre[index];
 
-    final result = await _service.delete(table: 'books', name: name);
+    final result = await _service.delete(table: 'books', id: book.id);
     if (!result.isSuccess) return result.error;
 
-    books.removeAt(index);
+    selectedGenre!.books.removeAt(index);
     notifyListeners();
     return null;
   }
@@ -147,7 +149,7 @@ class LibraryController extends ChangeNotifier {
   Future<String?> addGenre(String name) async {
     final normalized = _capitalize(name.trim());
     if (normalized.isEmpty) return 'O nome não pode ficar vazio.';
-    if (genres.containsKey(normalized)) return 'Esse gênero já existe.';
+    if (_genreExists(normalized)) return 'Esse gênero já existe.';
 
     final result = await _service.create(
       table: 'genres',
@@ -156,42 +158,53 @@ class LibraryController extends ChangeNotifier {
 
     if (!result.isSuccess) return result.error;
 
-    genres[normalized] = [];
-    selectedGenre = normalized;
+    final newGenre = Genre(
+      id: result.data!['id'] as String,
+      name: normalized,
+      books: [],
+    );
+    genres.add(newGenre);
+    selectedGenre = newGenre;
     notifyListeners();
     return null;
   }
 
-  Future<String?> editGenre(String currentName, String newName) async {
-    if (!genres.containsKey(currentName)) return 'Gênero não encontrado.';
-
+  Future<String?> editGenre(String newName) async {
     final normalized = _capitalize(newName.trim());
     if (normalized.isEmpty) return 'O nome não pode ficar vazio.';
-    if (genres.containsKey(normalized) &&
-        normalized.toLowerCase() != currentName.toLowerCase()) {
+    if (_genreExists(normalized) &&
+        normalized.toLowerCase() != selectedGenre!.name.toLowerCase()) {
       return 'Esse gênero já existe.';
     }
 
     final result = await _service.edit(
       table: 'genres',
-      currentName: currentName,
+      id: selectedGenre!.id,
       body: {'update': normalized},
     );
 
     if (!result.isSuccess) return result.error;
 
-    final books = genres.remove(currentName)!;
-    genres[normalized] = books;
-    selectedGenre = normalized;
+    final index = genres.indexOf(selectedGenre!);
+    final updated = Genre(
+      id: selectedGenre!.id,
+      name: normalized,
+      books: selectedGenre!.books,
+    );
+    genres[index] = updated;
+    selectedGenre = updated;
     notifyListeners();
     return null;
   }
 
-  Future<String?> deleteGenre(String name) async {
-    final result = await _service.delete(table: 'genres', name: name);
+  Future<String?> deleteGenre() async {
+    final result = await _service.delete(
+      table: 'genres',
+      id: selectedGenre!.id,
+    );
     if (!result.isSuccess) return result.error;
 
-    genres.remove(name);
+    genres.remove(selectedGenre!);
     selectedGenre = null;
     notifyListeners();
     return null;
@@ -202,7 +215,10 @@ class LibraryController extends ChangeNotifier {
   // ---------------------------------------------------------------------------
 
   bool _bookExists(String name) => booksInSelectedGenre
-      .any((b) => b.toLowerCase() == name.toLowerCase());
+      .any((b) => b.name.toLowerCase() == name.toLowerCase());
+
+  bool _genreExists(String name) =>
+      genres.any((g) => g.name.toLowerCase() == name.toLowerCase());
 
   String _capitalize(String s) =>
       s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);

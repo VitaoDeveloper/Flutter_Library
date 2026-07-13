@@ -1,7 +1,8 @@
+import 'package:dio/dio.dart';
+import '../api/api_client.dart';
+import '../models/genre.dart';
 import '../utils/api/api_result.dart';
 import '../utils/api/api_errors.dart';
-import '../api/api_client.dart';
-import 'package:dio/dio.dart';
 
 class LibraryService {
   final api = ApiClient().client;
@@ -12,20 +13,15 @@ class LibraryService {
     defaultValue: ApiClient.defaultBaseUrl,
   );
 
-  /// Returns raw map: { "Fiction": ["Book A", "Book B"], ... }
-  Future<ApiResult<Map<String, List<String>>>> getAll() async {
+  /// Returns a list of [Genre], each containing its [Book]s.
+  Future<ApiResult<List<Genre>>> getAll() async {
     try {
       final response = await api.get('/getall');
-      final raw = response.data as Map<String, dynamic>;
-
-      final result = raw.map(
-        (genre, books) => MapEntry(
-          genre,
-          (books as List).map((b) => b.toString()).toList(),
-        ),
-      );
-
-      return ApiResult.success(result);
+      final raw = response.data as List<dynamic>;
+      final genres = raw
+          .map((g) => Genre.fromJson(g as Map<String, dynamic>))
+          .toList();
+      return ApiResult.success(genres);
     } on DioException catch (e) {
       return ApiResult.failure(apiErrors.handleError(e));
     } catch (e) {
@@ -34,6 +30,8 @@ class LibraryService {
   }
 
   /// [table]: 'books' or 'genres'
+  /// For books, body must include 'name' and 'genre_id'.
+  /// For genres, body must include 'name'.
   Future<ApiResult<Map<String, dynamic>>> create({
     required String table,
     required Map<String, dynamic> body,
@@ -49,16 +47,16 @@ class LibraryService {
   }
 
   /// [table]: 'books' or 'genres'
-  /// [currentName]: current name used in WHERE clause
+  /// [id]: UUID of the record to update.
   Future<ApiResult<Map<String, dynamic>>> edit({
     required String table,
-    required String currentName,
+    required String id,
     required Map<String, dynamic> body,
   }) async {
     try {
-      final encodedName = Uri.encodeComponent(currentName);
+      final encodedId = Uri.encodeComponent(id);
       final response = await api.patch(
-        '$_mutationsBaseUrl/edit/$table/$encodedName',
+        '$_mutationsBaseUrl/edit/$table/$encodedId',
         data: body,
       );
       return ApiResult.success(response.data as Map<String, dynamic>);
@@ -70,14 +68,14 @@ class LibraryService {
   }
 
   /// [table]: 'books' or 'genres'
+  /// [id]: UUID of the record to delete.
   Future<ApiResult<Map<String, dynamic>>> delete({
     required String table,
-    required String name,
+    required String id,
   }) async {
     try {
-      final encodedName = Uri.encodeComponent(name);
-      final response =
-          await api.delete('$_mutationsBaseUrl/delete/$table/$encodedName');
+      final encodedId = Uri.encodeComponent(id);
+      final response = await api.delete('$_mutationsBaseUrl/delete/$table/$encodedId');
       return ApiResult.success(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       return ApiResult.failure(apiErrors.handleError(e));
