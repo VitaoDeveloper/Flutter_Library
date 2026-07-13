@@ -93,7 +93,7 @@ class LibraryController extends ChangeNotifier {
 
     final result = await _service.create(
       table: 'books',
-      body: {'name': normalized, 'genre': selectedGenre},
+      body: {'name': normalized, 'genre_id': selectedGenre!.id},
     );
 
     if (!result.isSuccess) return result.error;
@@ -114,21 +114,21 @@ class LibraryController extends ChangeNotifier {
     final normalized = _capitalize(newName.trim());
     if (normalized.isEmpty) return 'The name cannot be empty.';
 
-    final currentName = books[index];
+    final currentBook = books[index];
     if (_bookExists(normalized) &&
-        normalized.toLowerCase() != book.name.toLowerCase()) {
-      return 'Já existe um livro com esse nome.';
+        normalized.toLowerCase() != currentBook.name.toLowerCase()) {
+      return 'A book with that name already exists.';
     }
 
     final result = await _service.edit(
       table: 'books',
-      currentName: currentName,
+      id: currentBook.id,
       body: {'update': normalized},
     );
 
     if (!result.isSuccess) return result.error;
 
-    selectedGenre!.books[index] = Book(id: book.id, name: normalized);
+    selectedGenre!.books[index] = Book(id: currentBook.id, name: normalized);
     notifyListeners();
     return null;
   }
@@ -151,7 +151,7 @@ class LibraryController extends ChangeNotifier {
   Future<String?> addGenre(String name) async {
     final normalized = _capitalize(name.trim());
     if (normalized.isEmpty) return 'The name cannot be empty.';
-    if (genres.containsKey(normalized)) return 'A genre with that name already exists.';
+    if (_genreExists(normalized)) return 'A genre with that name already exists.';
 
     final result = await _service.create(
       table: 'genres',
@@ -174,14 +174,14 @@ class LibraryController extends ChangeNotifier {
   Future<String?> editGenre(String newName) async {
     final normalized = _capitalize(newName.trim());
     if (normalized.isEmpty) return 'The name cannot be empty.';
-    if (genres.containsKey(normalized) &&
-        normalized.toLowerCase() != currentName.toLowerCase()) {
+    if (_genreExists(normalized) &&
+        normalized.toLowerCase() != selectedGenre!.name.toLowerCase()) {
       return 'A genre with that name already exists.';
     }
 
     final result = await _service.edit(
       table: 'genres',
-      currentName: currentName,
+      id: selectedGenre!.id,
       body: {'update': normalized},
     );
 

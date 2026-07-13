@@ -13,8 +13,7 @@ class LibraryService {
     defaultValue: ApiClient.defaultBaseUrl,
   );
 
-  /// Returns raw map: { "Fiction": ["Book A", "Book B"], ... }
-  Future<ApiResult<Map<String, List<String>>>> getAll() async {
+  Future<ApiResult<List<Genre>>> getAll() async {
     try {
       final response = await api.get('/getall');
       final raw = response.data as List<dynamic>;
@@ -46,17 +45,14 @@ class LibraryService {
     }
   }
 
-  /// [table]: 'books' or 'genres'
-  /// [id]: UUID of the record to update.
   Future<ApiResult<Map<String, dynamic>>> edit({
     required String table,
     required String id,
     required Map<String, dynamic> body,
   }) async {
     try {
-      final encodedName = Uri.encodeComponent(currentName);
       final response = await api.patch(
-        '$_mutationsBaseUrl/edit/$table/$encodedName',
+        '$_mutationsBaseUrl/edit/$table/$id',
         data: body,
       );
       return ApiResult.success(response.data as Map<String, dynamic>);
@@ -67,16 +63,13 @@ class LibraryService {
     }
   }
 
-  /// [table]: 'books' or 'genres'
-  /// [id]: UUID of the record to delete.
   Future<ApiResult<Map<String, dynamic>>> delete({
     required String table,
     required String id,
   }) async {
     try {
-      final encodedName = Uri.encodeComponent(name);
       final response =
-          await api.delete('$_mutationsBaseUrl/delete/$table/$encodedName');
+          await api.delete('$_mutationsBaseUrl/delete/$table/$id');
       return ApiResult.success(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       return ApiResult.failure(apiErrors.handleError(e));

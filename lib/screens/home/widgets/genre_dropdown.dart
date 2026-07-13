@@ -21,7 +21,7 @@ class GenreDropdown extends StatelessWidget {
         children: [
           Icon(Icons.bookmark),
           SizedBox(width: 8),
-          Text('Selecione um gênero'),
+          Text('Select a genre'),
         ],
       ),
       initialValue: selectedGenre,

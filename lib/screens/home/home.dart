@@ -82,9 +82,9 @@ class _HomeState extends State<Home> {
     );
     if (name == null) return;
 
-    _showSnackBar('Salvando...');
+    _showSnackBar('Saving...');
     final error = await _controller.addBook(name);
-    _showSnackBar(error ?? 'Livro adicionado.');
+    _showSnackBar(error ?? 'Book added.');
     if (error == null) setState(() {});
   }
 
@@ -99,9 +99,9 @@ class _HomeState extends State<Home> {
     );
     if (newName == null) return;
 
-    _showSnackBar('Salvando...');
+    _showSnackBar('Saving...');
     final error = await _controller.editBook(index, newName);
-    _showSnackBar(error ?? 'Livro atualizado.');
+    _showSnackBar(error ?? 'Book updated.');
     if (error == null) setState(() {});
   }
 
@@ -115,9 +115,9 @@ class _HomeState extends State<Home> {
     );
     if (!confirmed) return;
 
-    _showSnackBar('Excluindo...');
+    _showSnackBar('Deleting...');
     final error = await _controller.deleteBook(index);
-    _showSnackBar(error ?? 'Livro "$name" excluído.');
+    _showSnackBar(error ?? 'Book "$name" deleted.');
     if (error == null) setState(() {});
   }
 
@@ -134,9 +134,9 @@ class _HomeState extends State<Home> {
     );
     if (name == null) return;
 
-    _showSnackBar('Salvando...');
+    _showSnackBar('Saving...');
     final error = await _controller.addGenre(name);
-    _showSnackBar(error ?? 'Gênero adicionado.');
+    _showSnackBar(error ?? 'Genre added.');
     if (error == null) setState(() {});
   }
 
@@ -151,9 +151,9 @@ class _HomeState extends State<Home> {
     );
     if (newName == null) return;
 
-    _showSnackBar('Salvando...');
+    _showSnackBar('Saving...');
     final error = await _controller.editGenre(newName);
-    _showSnackBar(error ?? 'Gênero atualizado.');
+    _showSnackBar(error ?? 'Genre updated.');
     if (error == null) setState(() {});
   }
 
@@ -167,9 +167,9 @@ class _HomeState extends State<Home> {
     );
     if (!confirmed) return;
 
-    _showSnackBar('Excluindo...');
+    _showSnackBar('Deleting...');
     final error = await _controller.deleteGenre();
-    _showSnackBar(error ?? 'Gênero "$name" excluído.');
+    _showSnackBar(error ?? 'Genre "$name" deleted.');
     if (error == null) setState(() {});
   }
 
@@ -205,7 +205,7 @@ class _HomeState extends State<Home> {
               ElevatedButton.icon(
                 onPressed: _reloadData,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Tentar novamente'),
+                label: const Text('Try again'),
               ),
             ],
           ),
@@ -283,7 +283,7 @@ class _HomeState extends State<Home> {
                             .indexWhere((b) => b.id == book.id);
                         return BookListTile(
                           book: book,
-                          onTap: () => _showSnackBar('Selecionado: ${book.name}'),
+                          onTap: () => _showSnackBar('Selected: ${book.name}'),
                           onEdit: () => _editBook(realIndex),
                           onDelete: () => _deleteBook(realIndex),
                         );

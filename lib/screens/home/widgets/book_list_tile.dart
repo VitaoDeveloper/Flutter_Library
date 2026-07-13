@@ -26,7 +26,7 @@ class BookListTile extends StatelessWidget {
           backgroundColor: Colors.deepPurple.shade50,
           child: Icon(Icons.book_rounded, color: Colors.deepPurple.shade400),
         ),
-        title: Text(book, style: const TextStyle(fontWeight: FontWeight.w600)),
+        title: Text(book.name, style: const TextStyle(fontWeight: FontWeight.w600)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
