@@ -20,10 +20,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    // Fetch all genres and books from the API on startup
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _controller.initialize().then((_) => setState(() {}));
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _reloadData());
   }
 
   @override
@@ -43,6 +40,35 @@ class _HomeState extends State<Home> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: const Text('Library'),
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF8B5CF6), Color(0xFF6366F1)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh_rounded),
+          tooltip: 'Reload',
+          onPressed: _reloadData,
+        ),
+      ],
+    );
+  }
+
+  Future<void> _reloadData() async {
+    final reloadFuture = _controller.initialize();
+    setState(() {});
+    await reloadFuture;
+    if (mounted) setState(() {});
+  }
+
   // ---------------------------------------------------------------------------
   // Book actions
   // ---------------------------------------------------------------------------
@@ -50,7 +76,7 @@ class _HomeState extends State<Home> {
   Future<void> _addBook() async {
     final name = await showTextDialog(
       context,
-      title: 'Add Book',
+      title: 'Add book',
       fieldLabel: 'Book name',
       confirmButtonText: 'Add',
     );
@@ -66,7 +92,7 @@ class _HomeState extends State<Home> {
     final currentName = _controller.booksInSelectedGenre[index];
     final newName = await showTextDialog(
       context,
-      title: 'Edit Book',
+      title: 'Edit book',
       fieldLabel: 'Book name',
       confirmButtonText: 'Save',
       initialText: currentName,
@@ -83,7 +109,7 @@ class _HomeState extends State<Home> {
     final name = _controller.booksInSelectedGenre[index];
     final confirmed = await showConfirmationDialog(
       context,
-      title: 'Delete Book',
+      title: 'Delete book',
       message: 'Are you sure you want to delete "$name"?',
       confirmButtonText: 'Delete',
     );
@@ -102,7 +128,7 @@ class _HomeState extends State<Home> {
   Future<void> _addGenre() async {
     final name = await showTextDialog(
       context,
-      title: 'Add Genre',
+      title: 'Add genre',
       fieldLabel: 'Genre name',
       confirmButtonText: 'Add',
     );
@@ -118,7 +144,7 @@ class _HomeState extends State<Home> {
     final currentName = _controller.selectedGenre!;
     final newName = await showTextDialog(
       context,
-      title: 'Edit Genre',
+      title: 'Edit genre',
       fieldLabel: 'Genre name',
       confirmButtonText: 'Save',
       initialText: currentName,
@@ -135,7 +161,7 @@ class _HomeState extends State<Home> {
     final name = _controller.selectedGenre!;
     final confirmed = await showConfirmationDialog(
       context,
-      title: 'Delete Genre',
+      title: 'Delete genre',
       message: 'Are you sure you want to delete "$name"?',
       confirmButtonText: 'Delete',
     );
@@ -156,31 +182,15 @@ class _HomeState extends State<Home> {
     // Loading state — shown only on first fetch
     if (_controller.isLoading) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'Library',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
-            ),
-          ),
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        ),
-        body: AppLoading(label: "Loading")
+        appBar: _buildAppBar(),
+        body: AppLoading(label: "Loading...")
       );
     }
 
     // Error state
     if (_controller.status == LibraryStatus.error) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'Library',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
-            ),
-          ),
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        ),
+        appBar: _buildAppBar(),
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -188,14 +198,12 @@ class _HomeState extends State<Home> {
               const Icon(Icons.wifi_off, size: 48, color: Colors.red),
               const SizedBox(height: 16),
               Text(
-                _controller.errorMessage ?? 'Unknown error.',
+                _controller.errorMessage ?? 'Unable to load the data.',
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
-                onPressed: () => _controller
-                    .initialize()
-                    .then((_) => setState(() {})),
+                onPressed: _reloadData,
                 icon: const Icon(Icons.refresh),
                 label: const Text('Try again'),
               ),
@@ -209,57 +217,63 @@ class _HomeState extends State<Home> {
     final books = _controller.filteredBooks;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Library',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onPrimaryContainer,
-          ),
-        ),
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Reload',
-            onPressed: _controller.initialize,
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _controller.selectedGenre == null
-            ? () => _showSnackBar('Select a genre before adding a book.')
-            : _addBook,
-        tooltip: 'Add Book',
-        child: const Icon(Icons.add),
-      ),
+      appBar: _buildAppBar(),
       body: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            GenreDropdown(
-              genres: _controller.genres,
-              selectedGenre: _controller.selectedGenre,
-              onChanged: (selection) => setState(() {
-                _controller.selectGenre(selection);
-                _searchController.clear();
-              }),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GenreDropdown(
+                        genres: _controller.genres,
+                        selectedGenre: _controller.selectedGenre,
+                        onChanged: (selection) => setState(() {
+                          _controller.selectGenre(selection);
+                          _searchController.clear();
+                        }),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Tooltip(
+                      message: 'Add book',
+                      child: FloatingActionButton.small(
+                        heroTag: 'add_book_inline',
+                        onPressed: _controller.selectedGenre == null
+                            ? () => _showSnackBar(
+                                'Select a genre before adding a book.',
+                              )
+                            : _addBook,
+                        child: const Icon(Icons.add),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 12),
-            TextField(
-              controller: _searchController,
-              enabled: _controller.selectedGenre != null,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.search),
-                hintText: 'Search book',
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: TextField(
+                  controller: _searchController,
+                  enabled: _controller.selectedGenre != null,
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.search),
+                    hintText: 'Search book',
+                  ),
+                  onChanged: (text) =>
+                      setState(() => _controller.updateSearch(text)),
+                ),
               ),
-              onChanged: (text) =>
-                  setState(() => _controller.updateSearch(text)),
             ),
             const SizedBox(height: 20),
             Expanded(
               child: books.isEmpty
-                  ? const Center(child: Text('No results.'))
+                  ? const Center(child: Text('No results found.'))
                   : ListView.separated(
                       itemCount: books.length,
                       separatorBuilder: (_, __) => const Divider(height: 1),

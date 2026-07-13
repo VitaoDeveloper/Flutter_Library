@@ -17,25 +17,27 @@ class GenreActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       children: [
-        ElevatedButton.icon(
-          onPressed: onAdd,
-          icon: const Icon(Icons.add),
-          label: const Text('Add Genre'),
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: onAdd,
+            icon: const Icon(Icons.add),
+            label: const Text('Add genre'),
+          ),
         ),
         if (selectedGenre != null) ...[
-          const SizedBox(height: 10),
-          ElevatedButton.icon(
+          const SizedBox(width: 8),
+          FilledButton.tonalIcon(
             onPressed: onEdit,
             icon: const Icon(Icons.edit),
-            label: const Text('Edit Genre'),
+            label: const Text('Edit'),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(width: 8),
           FilledButton.icon(
             onPressed: onDelete,
             icon: const Icon(Icons.delete),
-            label: const Text('Delete Genre'),
+            label: const Text('Delete'),
           ),
         ],
       ],

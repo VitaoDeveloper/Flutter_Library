@@ -7,6 +7,11 @@ class LibraryService {
   final api = ApiClient().client;
   final apiErrors = ApiErrors();
 
+  static const String _mutationsBaseUrl = String.fromEnvironment(
+    'LIBRARY_API_MUTATIONS_BASE_URL',
+    defaultValue: ApiClient.defaultBaseUrl,
+  );
+
   /// Returns raw map: { "Fiction": ["Book A", "Book B"], ... }
   Future<ApiResult<Map<String, List<String>>>> getAll() async {
     try {
@@ -31,11 +36,10 @@ class LibraryService {
   /// [table]: 'books' or 'genres'
   Future<ApiResult<Map<String, dynamic>>> create({
     required String table,
-    required String name,
     required Map<String, dynamic> body,
   }) async {
     try {
-      final response = await api.post('/create/$table/$name', data: body);
+      final response = await api.post('/create/$table/', data: body);
       return ApiResult.success(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       return ApiResult.failure(apiErrors.handleError(e));
@@ -52,7 +56,11 @@ class LibraryService {
     required Map<String, dynamic> body,
   }) async {
     try {
-      final response = await api.patch('/edit/$table/$currentName', data: body);
+      final encodedName = Uri.encodeComponent(currentName);
+      final response = await api.patch(
+        '$_mutationsBaseUrl/edit/$table/$encodedName',
+        data: body,
+      );
       return ApiResult.success(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       return ApiResult.failure(apiErrors.handleError(e));
@@ -67,7 +75,9 @@ class LibraryService {
     required String name,
   }) async {
     try {
-      final response = await api.delete('/delete/$table/$name');
+      final encodedName = Uri.encodeComponent(name);
+      final response =
+          await api.delete('$_mutationsBaseUrl/delete/$table/$encodedName');
       return ApiResult.success(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       return ApiResult.failure(apiErrors.handleError(e));
@@ -75,6 +85,4 @@ class LibraryService {
       return ApiResult.failure('Unexpected error: $e');
     }
   }
-
-  
 }
